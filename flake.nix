@@ -21,7 +21,7 @@
       system: let
         pkgs = nixpkgs.legacyPackages.${system};
 
-        jdk = pkgs.jdk17;
+        jdk = pkgs.jdk25;
 
         # Runtime libraries LWJGL/Minecraft need to launch the client (`runClient`).
         runtimeLibs =
