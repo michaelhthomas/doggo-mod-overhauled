@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": {
+      "item": "minecraft:blue_dye"
+    },
+    "I": {
+      "item": "minecraft:iron_ingot"
+    }
+  },
+  "pattern": [
+    "   ",
+    "ICI",
+    " I "
+  ],
+  "result": {
+    "item": "doggomodoverhauled:dog_bowl_blue"
+  },
+  "show_notification": true
+}

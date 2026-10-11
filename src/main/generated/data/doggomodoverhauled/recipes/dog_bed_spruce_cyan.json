@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "P": {
+      "item": "minecraft:spruce_slab"
+    },
+    "W": {
+      "item": "minecraft:cyan_wool"
+    }
+  },
+  "pattern": [
+    "WW",
+    "PP"
+  ],
+  "result": {
+    "item": "doggomodoverhauled:dog_bed_spruce_cyan"
+  },
+  "show_notification": true
+}

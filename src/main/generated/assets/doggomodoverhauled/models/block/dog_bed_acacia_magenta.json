@@ -1,0 +1,8 @@
+{
+  "parent": "doggomodoverhauled:block/dog_bed",
+  "textures": {
+    "bed": "minecraft:block/magenta_wool",
+    "border": "minecraft:block/acacia_planks",
+    "particle": "minecraft:block/acacia_planks"
+  }
+}

@@ -67,6 +67,9 @@
     ],
     "rei_client": [
       "net.lordmrk.dmo.modules.rei.ReiPlugin"
+    ],
+    "fabric-datagen": [
+      "net.lordmrk.dmo.datagen.DoggoDataGenerator"
     ]
   },
   "mixins": [

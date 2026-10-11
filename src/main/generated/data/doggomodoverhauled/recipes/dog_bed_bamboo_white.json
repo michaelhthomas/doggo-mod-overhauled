@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "P": {
+      "item": "minecraft:bamboo_slab"
+    },
+    "W": {
+      "item": "minecraft:white_wool"
+    }
+  },
+  "pattern": [
+    "WW",
+    "PP"
+  ],
+  "result": {
+    "item": "doggomodoverhauled:dog_bed_bamboo_white"
+  },
+  "show_notification": true
+}

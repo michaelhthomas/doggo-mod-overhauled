@@ -36,6 +36,15 @@ jobs:
         run: chmod +x ./gradlew
       - name: build
         run: ./gradlew build
+      - name: verify generated data is up to date
+        if: ${{ runner.os == 'Linux' }}
+        run: |
+          ./gradlew runDatagen
+          if [ -n "$(git status --porcelain -- src/main/generated)" ]; then
+            echo "::error::Generated data is out of date. Run './gradlew runDatagen' and commit src/main/generated."
+            git status --porcelain -- src/main/generated
+            exit 1
+          fi
       - name: capture build artifacts
         if: ${{ runner.os == 'Linux' && matrix.java == '17' }} # Only upload artifacts built from latest java on one OS
         uses: actions/upload-artifact@v2

@@ -1,8 +1,0 @@
-{
-	"parent": "doggomodoverhauled:block/dog_bowl",
-	"textures": {
-		"bottom": "block/gray_concrete",
-		"side": "block/light_gray_concrete",
-		"particle": "block/gray_concrete"
-	}
-}

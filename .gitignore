@@ -8,6 +8,8 @@ classes/
 # eclipse
 
 *.launch
+.factorypath
+.apt_generated/
 
 # idea
 
@@ -31,6 +33,10 @@ bin/
 # fabric
 
 run/
+
+# datagen
+
+src/main/generated/.cache/
 
 # nix
 

@@ -1,8 +1,0 @@
-{
-	"parent": "doggomodoverhauled:block/dog_bed",
-	"textures": {
-		"border": "block/crimson_planks",
-		"bed": "block/light_blue_wool",
-		"particle": "block/crimson_planks"
-	}
-}

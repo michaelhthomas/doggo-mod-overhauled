@@ -1,0 +1,22 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "doggomodoverhauled:block/dog_bed_bamboo_white",
+      "uvlock": true,
+      "y": 90
+    },
+    "facing=north": {
+      "model": "doggomodoverhauled:block/dog_bed_bamboo_white"
+    },
+    "facing=south": {
+      "model": "doggomodoverhauled:block/dog_bed_bamboo_white",
+      "uvlock": true,
+      "y": 180
+    },
+    "facing=west": {
+      "model": "doggomodoverhauled:block/dog_bed_bamboo_white",
+      "uvlock": true,
+      "y": 270
+    }
+  }
+}

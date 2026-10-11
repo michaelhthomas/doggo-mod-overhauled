@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "P": {
+      "item": "minecraft:jungle_slab"
+    },
+    "W": {
+      "item": "minecraft:yellow_wool"
+    }
+  },
+  "pattern": [
+    "WW",
+    "PP"
+  ],
+  "result": {
+    "item": "doggomodoverhauled:dog_bed_jungle_yellow"
+  },
+  "show_notification": true
+}

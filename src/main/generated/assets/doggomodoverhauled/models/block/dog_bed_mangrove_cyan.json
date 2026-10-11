@@ -1,0 +1,8 @@
+{
+  "parent": "doggomodoverhauled:block/dog_bed",
+  "textures": {
+    "bed": "minecraft:block/cyan_wool",
+    "border": "minecraft:block/mangrove_planks",
+    "particle": "minecraft:block/mangrove_planks"
+  }
+}

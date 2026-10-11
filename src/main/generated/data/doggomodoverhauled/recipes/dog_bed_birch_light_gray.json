@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "P": {
+      "item": "minecraft:birch_slab"
+    },
+    "W": {
+      "item": "minecraft:light_gray_wool"
+    }
+  },
+  "pattern": [
+    "WW",
+    "PP"
+  ],
+  "result": {
+    "item": "doggomodoverhauled:dog_bed_birch_light_gray"
+  },
+  "show_notification": true
+}
