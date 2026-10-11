@@ -2,16 +2,16 @@ package net.lordmrk.dmo;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.client.rendering.v1.BlockEntityRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
-import net.fabricmc.fabric.api.client.screenhandler.v1.ScreenRegistry;
 import net.lordmrk.dmo.client.gui.screen.ingame.DogBowlScreen;
 import net.lordmrk.dmo.client.render.block.entity.DogBowlBlockEntityRenderer;
 import net.lordmrk.dmo.client.render.entity.DoggoEntityRenderer;
 import net.lordmrk.dmo.client.render.entity.model.DoggoEntityModel;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.model.geom.ModelLayerLocation;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -30,8 +30,8 @@ public class DoggoModOverhauledClient implements ClientModInitializer {
         EntityRendererRegistry.register(DoggoEntities.DOGGO_ENTITY, DoggoEntityRenderer::new);
         EntityModelLayerRegistry.registerModelLayer(DOGGO, DoggoEntityModel::getTexturedModelData);
 
-        BlockEntityRendererRegistry.register(DoggoModOverhauled.DOG_BOWL_ENTITY, DogBowlBlockEntityRenderer::new);
-        ScreenRegistry.register(DoggoModOverhauled.DOG_BOWL_SCREEN_HANDLER, DogBowlScreen::new);
+        BlockEntityRenderers.register(DoggoModOverhauled.DOG_BOWL_ENTITY, DogBowlBlockEntityRenderer::new);
+        MenuScreens.register(DoggoModOverhauled.DOG_BOWL_SCREEN_HANDLER, DogBowlScreen::new);
 
         EntityRendererRegistry.register(DoggoEntities.TENNIS_BALL_RED_ENTITY, ThrownItemRenderer::new);
         EntityRendererRegistry.register(DoggoEntities.TENNIS_BALL_YELLOW_ENTITY, ThrownItemRenderer::new);

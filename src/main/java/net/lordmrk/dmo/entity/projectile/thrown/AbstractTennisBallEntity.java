@@ -1,7 +1,5 @@
 package net.lordmrk.dmo.entity.projectile.thrown;
 
-import net.lordmrk.dmo.DoggoEntities;
-import net.lordmrk.dmo.DoggoModOverhauled;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.Containers;
 import net.minecraft.world.entity.Entity;

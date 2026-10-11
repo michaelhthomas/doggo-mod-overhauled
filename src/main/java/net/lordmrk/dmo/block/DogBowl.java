@@ -17,7 +17,6 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -26,14 +25,14 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public class DogBowl extends BaseEntityBlock implements EntityBlock {
-	
+public class DogBowl extends BaseEntityBlock {
+
 	protected static final VoxelShape SHAPE = Block.box(2.5, 0.0, 2.5, 13.5, 4.0, 13.5);
 
 	private final DyeColor color;
 
 	public DogBowl(DyeColor color) {
-		super(FabricBlockSettings.of().sound(SoundType.STONE).strength(2.0f).requiresCorrectToolForDrops());
+		super(FabricBlockSettings.create().sound(SoundType.STONE).strength(2.0f).requiresCorrectToolForDrops());
 
 		this.color = color;
 	}
@@ -59,13 +58,14 @@ public class DogBowl extends BaseEntityBlock implements EntityBlock {
 	public RenderShape getRenderShape(BlockState state) {
 		return RenderShape.MODEL;
 	}
-	
+
 	@Override
 	public boolean hasAnalogOutputSignal(BlockState state) {
 		return true;
 	}
-	
+
 	@Override
+	@SuppressWarnings("deprecation")
 	public void onRemove(BlockState state, Level world, BlockPos pos, BlockState newState, boolean moved) {
 		if(state.getBlock() != newState.getBlock()) {
             BlockEntity blockEntity = world.getBlockEntity(pos);
@@ -79,7 +79,7 @@ public class DogBowl extends BaseEntityBlock implements EntityBlock {
             super.onRemove(state, world, pos, newState, moved);
         }
 	}
-	
+
 	@Override
 	public void setPlacedBy(Level world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack itemStack) {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
@@ -94,41 +94,41 @@ public class DogBowl extends BaseEntityBlock implements EntityBlock {
 			dogBowlEntity.setCustomName(itemStack.getHoverName());
 		}
 	}
-	
+
 	@Override
 	public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
 		if(!world.isClientSide) {
 			MenuProvider screenHandlerFactory = state.getMenuProvider(world, pos);
-			
+
 			if(screenHandlerFactory != null) {
 				player.openMenu(screenHandlerFactory);
 			}
 		}
-		
+
 		return InteractionResult.SUCCESS;
 	}
-	
+
 	public static boolean isEqual(Block block) {
 		return block instanceof DogBowl;
 	}
-	
+
 	public static boolean canEatFromBowl(BlockPos pos, DoggoEntity doggoEntity) {
 		Level world = doggoEntity.level();
 
 		if(isEqual(world.getBlockState(pos).getBlock())) {
 			DogBowlEntity dogBowlEntity = (DogBowlEntity) world.getBlockEntity(pos);
-			
+
 			if(dogBowlEntity.hasCustomName()) {
 				if(doggoEntity.hasCustomName() && doggoEntity.getDisplayName().getString().equals(dogBowlEntity.getCustomName().getString())) {
 					return true;
 				}
-				
+
 				return false;
 			}
-			
+
 			return true;
 		}
-		
+
 		return false;
 	}
 }

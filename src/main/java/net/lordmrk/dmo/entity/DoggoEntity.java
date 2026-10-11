@@ -61,7 +61,6 @@ import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.EntityGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -548,7 +547,7 @@ public class DoggoEntity extends TamableAnimal implements NeutralMob {
 
         this.goalSelector.addGoal(1, new FloatGoal(this));
         this.goalSelector.addGoal(1, new DoggoEscapeDangerGoal(this, 1.5D));
-        this.goalSelector.addGoal(1, new DoggoAvoidLlamaGoal(this, Llama.class, 24.0F, 1.5D, 1.5D));
+        this.goalSelector.addGoal(1, new DoggoAvoidLlamaGoal<>(this, Llama.class, 24.0F, 1.5D, 1.5D));
         this.goalSelector.addGoal(2, new DoggoNapGoal(this));
         this.goalSelector.addGoal(3, new DoggoEatGoal(this));
         this.goalSelector.addGoal(3, new DoggoLieDownGoal(this));
@@ -575,9 +574,9 @@ public class DoggoEntity extends TamableAnimal implements NeutralMob {
         this.targetSelector.addGoal(3, (new HurtByTargetGoal(this, new Class[0])).setAlertOthers(new Class[0]));
         //this.targetSelector.add(4, new ActiveTargetGoal(this, PlayerEntity.class, 10, true, false, this::shouldAngerAt));
         //this.targetSelector.add(5, new UntamedActiveTargetGoal(this, AnimalEntity.class, false, FOLLOW_TAMED_PREDICATE));
-        this.targetSelector.addGoal(6, new NonTameRandomTargetGoal(this, Turtle.class, false, Turtle.BABY_ON_LAND_SELECTOR));
-        this.targetSelector.addGoal(7, new NearestAttackableTargetGoal(this, AbstractSkeleton.class, false));
-        this.targetSelector.addGoal(8, new ResetUniversalAngerTargetGoal(this, true));
+        this.targetSelector.addGoal(6, new NonTameRandomTargetGoal<>(this, Turtle.class, false, Turtle.BABY_ON_LAND_SELECTOR));
+        this.targetSelector.addGoal(7, new NearestAttackableTargetGoal<>(this, AbstractSkeleton.class, false));
+        this.targetSelector.addGoal(8, new ResetUniversalAngerTargetGoal<>(this, true));
     }
 
     public boolean isAction(DoggoAction doggoAction) {

@@ -2,8 +2,6 @@ package net.lordmrk.dmo.entity.ai.goal;
 
 import net.lordmrk.dmo.DoggoAction;
 import net.lordmrk.dmo.DoggoItemTags;
-import net.lordmrk.dmo.DoggoItems;
-import net.lordmrk.dmo.DoggoModOverhauled;
 import net.lordmrk.dmo.entity.DoggoEntity;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;

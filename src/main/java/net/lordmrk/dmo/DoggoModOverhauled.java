@@ -2,13 +2,13 @@ package net.lordmrk.dmo;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
-import net.fabricmc.fabric.api.screenhandler.v1.ScreenHandlerRegistry;
 import net.lordmrk.dmo.block.entity.DogBowlEntity;
 import net.lordmrk.dmo.screen.DogBowlScreenHandler;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import org.slf4j.Logger;
@@ -51,6 +51,6 @@ public class DoggoModOverhauled implements ModInitializer {
 	}
 
 	static {
-		DOG_BOWL_SCREEN_HANDLER = ScreenHandlerRegistry.registerSimple(DOG_BOWL, DogBowlScreenHandler::new);
+		DOG_BOWL_SCREEN_HANDLER = Registry.register(BuiltInRegistries.MENU, DOG_BOWL, new MenuType<>(DogBowlScreenHandler::new, FeatureFlags.VANILLA_SET));
 	}
 }

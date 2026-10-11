@@ -8,7 +8,6 @@ import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.plugin.common.displays.DefaultInformationDisplay;
 import net.lordmrk.dmo.DoggoBlocks;
 import net.lordmrk.dmo.DoggoItems;
-import net.lordmrk.dmo.DoggoModOverhauled;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;

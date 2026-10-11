@@ -22,10 +22,10 @@ public class DoggoEntityRenderer extends MobRenderer<DoggoEntity, DoggoEntityMod
     private static final ResourceLocation ANGRY_TEXTURE = new ResourceLocation(DoggoModOverhauled.MODID, "textures/entity/doggo/doggo_angry.png");
     private static final ResourceLocation SLEEPING_TEXTURE = new ResourceLocation(DoggoModOverhauled.MODID, "textures/entity/doggo/doggo_sleeping.png");
 
-    private final Map<DoggoAction, DoggoEntityModel<DoggoEntity>> doggoModels = new HashMap();
+    private final Map<DoggoAction, DoggoEntityModel<DoggoEntity>> doggoModels = new HashMap<>();
 
     public DoggoEntityRenderer(EntityRendererProvider.Context context) {
-        super(context, new DoggoEntityModel(context.bakeLayer(DoggoModOverhauledClient.DOGGO)), 0.5F);
+        super(context, new DoggoEntityModel<>(context.bakeLayer(DoggoModOverhauledClient.DOGGO)), 0.5F);
         this.addLayer(new DoggoCollarFeatureRenderer(this));
         this.addLayer(new DoggoHeldItemFeatureRenderer(this));
 

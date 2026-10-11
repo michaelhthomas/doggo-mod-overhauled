@@ -1,7 +1,6 @@
 package net.lordmrk.dmo.block;
 
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
-import net.lordmrk.dmo.StringUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.Entity;
@@ -45,7 +44,7 @@ public class DogBed extends HorizontalDirectionalBlock {
     //private final String name;
 
     public DogBed(DyeColor color, WoodType woodType) {
-        super(FabricBlockSettings.of().sound(SoundType.WOOD).strength(0.2F).noOcclusion().ignitedByLava().pushReaction(PushReaction.DESTROY));
+        super(FabricBlockSettings.create().sound(SoundType.WOOD).strength(0.2F).noOcclusion().ignitedByLava().pushReaction(PushReaction.DESTROY));
 
         this.color = color;
         //String[] woodModColonName = woodType.name().split(":");

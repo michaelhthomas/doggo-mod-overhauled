@@ -94,16 +94,16 @@ public class DoggoEntityModel<T extends DoggoEntity> extends ColorableAgeableLis
 
 	public DoggoEntityModel(ModelPart root) {
 		this.head = root.getChild(PartNames.HEAD);
-	    this.realHead = this.head.getChild("real_head");
+	    this.realHead = this.head.getChild(REAL_HEAD);
 		this.mouth = this.realHead.getChild("doggo_mouth");
 	    this.torso = root.getChild(PartNames.BODY);
-	    this.neck = root.getChild("upper_body");
+	    this.neck = root.getChild(UPPER_BODY);
 	    this.rightHindLeg = root.getChild(PartNames.RIGHT_HIND_LEG);
 	    this.leftHindLeg = root.getChild(PartNames.LEFT_HIND_LEG);
 	    this.rightFrontLeg = root.getChild(PartNames.RIGHT_FRONT_LEG);
 	    this.leftFrontLeg = root.getChild(PartNames.LEFT_FRONT_LEG);
 	    this.tail = root.getChild(PartNames.TAIL);
-	    this.realTail = this.tail.getChild("real_tail");
+	    this.realTail = this.tail.getChild(REAL_TAIL);
 	}
 
 	public static LayerDefinition getTexturedModelData() {
@@ -112,12 +112,12 @@ public class DoggoEntityModel<T extends DoggoEntity> extends ColorableAgeableLis
 
 		// Head
 		PartDefinition modelPartData2 = modelPartData.addOrReplaceChild(PartNames.HEAD, CubeListBuilder.create(), PartPose.offset(-1.0F, 13.5F, -7.0F));
-		modelPartData2.addOrReplaceChild("real_head", CubeListBuilder.create().texOffs(0, 0).addBox(-2.0F, -3.0F, -2.0F, 6.0F, 6.0F, 4.0F).texOffs(16, 14).addBox(-2.0F, -5.0F, 0.0F, 2.0F, 2.0F, 1.0F).texOffs(16, 14).addBox(2.0F, -5.0F, 0.0F, 2.0F, 2.0F, 1.0F).texOffs(0, 10).addBox(-0.5F, 0.0F, -5.0F, 3.0F, 2.0F, 4.0F), PartPose.ZERO)
+		modelPartData2.addOrReplaceChild(REAL_HEAD, CubeListBuilder.create().texOffs(0, 0).addBox(-2.0F, -3.0F, -2.0F, 6.0F, 6.0F, 4.0F).texOffs(16, 14).addBox(-2.0F, -5.0F, 0.0F, 2.0F, 2.0F, 1.0F).texOffs(16, 14).addBox(2.0F, -5.0F, 0.0F, 2.0F, 2.0F, 1.0F).texOffs(0, 10).addBox(-0.5F, 0.0F, -5.0F, 3.0F, 2.0F, 4.0F), PartPose.ZERO)
 			.addOrReplaceChild("doggo_mouth", CubeListBuilder.create().texOffs(43, 14).addBox(-0.5F, 0.0F, -5.0F, 3.0F, 1.0F, 4.0F), PartPose.offset(0.0F, 2.0F, 0.0F));
 
 		// Body
 		modelPartData.addOrReplaceChild(PartNames.BODY, CubeListBuilder.create().texOffs(18, 14).addBox(-3.0F, -2.0F, -3.0F, 6.0F, 9.0F, 6.0F), PartPose.offsetAndRotation(0.0F, 14.0F, 2.0F, 1.5707964F, 0.0F, 0.0F));
-		modelPartData.addOrReplaceChild("upper_body", CubeListBuilder.create().texOffs(21, 0).addBox(-3.0F, -3.0F, -3.0F, 8.0F, 6.0F, 7.0F), PartPose.offsetAndRotation(-1.0F, 14.0F, -3.0F, 1.5707964F, 0.0F, 0.0F));
+		modelPartData.addOrReplaceChild(UPPER_BODY, CubeListBuilder.create().texOffs(21, 0).addBox(-3.0F, -3.0F, -3.0F, 8.0F, 6.0F, 7.0F), PartPose.offsetAndRotation(-1.0F, 14.0F, -3.0F, 1.5707964F, 0.0F, 0.0F));
 
 		// Legs
 		CubeListBuilder modelPartBuilder = CubeListBuilder.create().texOffs(0, 18).addBox(0.0F, 0.0F, -1.0F, 2.0F, 8.0F, 2.0F);
@@ -128,7 +128,7 @@ public class DoggoEntityModel<T extends DoggoEntity> extends ColorableAgeableLis
 
 		// Tail
 		PartDefinition modelPartData3 = modelPartData.addOrReplaceChild(PartNames.TAIL, CubeListBuilder.create(), PartPose.offsetAndRotation(-1.0F, 12.0F, 8.0F, 0.62831855F, 0.0F, 0.0F));
-		modelPartData3.addOrReplaceChild("real_tail", CubeListBuilder.create().texOffs(9, 18).addBox(0.0F, 0.0F, -1.0F, 2.0F, 8.0F, 2.0F), PartPose.ZERO);
+		modelPartData3.addOrReplaceChild(REAL_TAIL, CubeListBuilder.create().texOffs(9, 18).addBox(0.0F, 0.0F, -1.0F, 2.0F, 8.0F, 2.0F), PartPose.ZERO);
 
 		return LayerDefinition.create(modelData, 64, 32);
 	}
@@ -154,6 +154,8 @@ public class DoggoEntityModel<T extends DoggoEntity> extends ColorableAgeableLis
 		case PLAY_TIME:
 			this.head.xRot = j * 0.017453292F;
 			this.head.yRot = i * 0.017453292F;
+		default:
+			break;
 		}
 
 		tail(doggoEntity, h);

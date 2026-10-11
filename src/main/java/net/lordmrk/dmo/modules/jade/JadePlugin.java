@@ -2,7 +2,6 @@ package net.lordmrk.dmo.modules.jade;
 
 import net.lordmrk.dmo.block.DogBowl;
 import net.lordmrk.dmo.block.entity.DogBowlEntity;
-import net.lordmrk.dmo.entity.DoggoEntity;
 import snownee.jade.api.*;
 
 @WailaPlugin
