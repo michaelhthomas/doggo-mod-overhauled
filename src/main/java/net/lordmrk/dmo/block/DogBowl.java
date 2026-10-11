@@ -1,11 +1,12 @@
 package net.lordmrk.dmo.block;
 
-import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.lordmrk.dmo.block.entity.DogBowlEntity;
 import net.lordmrk.dmo.entity.DoggoEntity;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Containers;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.LivingEntity;
@@ -20,6 +21,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -31,8 +33,8 @@ public class DogBowl extends BaseEntityBlock {
 
 	private final DyeColor color;
 
-	public DogBowl(DyeColor color) {
-		super(FabricBlockSettings.create().sound(SoundType.STONE).strength(2.0f).requiresCorrectToolForDrops());
+	public DogBowl(ResourceKey<Block> key, DyeColor color) {
+		super(BlockBehaviour.Properties.of().setId(key).sound(SoundType.STONE).strength(2.0f).requiresCorrectToolForDrops());
 
 		this.color = color;
 	}
@@ -47,14 +49,16 @@ public class DogBowl extends BaseEntityBlock {
 	}
 
 	@Override
-	public int getAnalogOutputSignal(BlockState state, Level world, BlockPos pos) {
+	protected int getAnalogOutputSignal(BlockState state, Level world, BlockPos pos, Direction direction) {
 		return AbstractContainerMenu.getRedstoneSignalFromBlockEntity(world.getBlockEntity(pos));
 	}
 
+	@Override
 	public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
 		return SHAPE;
 	}
 
+	@Override
 	public RenderShape getRenderShape(BlockState state) {
 		return RenderShape.MODEL;
 	}
@@ -65,19 +69,16 @@ public class DogBowl extends BaseEntityBlock {
 	}
 
 	@Override
-	@SuppressWarnings("deprecation")
-	public void onRemove(BlockState state, Level world, BlockPos pos, BlockState newState, boolean moved) {
-		if(state.getBlock() != newState.getBlock()) {
-            BlockEntity blockEntity = world.getBlockEntity(pos);
+	protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel world, BlockPos pos, boolean movedByPiston) {
+		BlockEntity blockEntity = world.getBlockEntity(pos);
 
-            if (blockEntity instanceof DogBowlEntity) {
-                Containers.dropContents(world, pos, (DogBowlEntity)blockEntity);
-                // update comparators
-                world.updateNeighbourForOutputSignal(pos,this);
-            }
+		if (blockEntity instanceof DogBowlEntity) {
+			Containers.dropContents(world, pos, (DogBowlEntity)blockEntity);
+			// update comparators
+			world.updateNeighbourForOutputSignal(pos, this);
+		}
 
-            super.onRemove(state, world, pos, newState, moved);
-        }
+		super.affectNeighborsAfterRemoval(state, world, pos, movedByPiston);
 	}
 
 	@Override
@@ -90,14 +91,14 @@ public class DogBowl extends BaseEntityBlock {
 
 		DogBowlEntity dogBowlEntity = (DogBowlEntity) blockEntity;
 
-		if(itemStack.hasCustomHoverName()) {
+		if(itemStack.has(net.minecraft.core.component.DataComponents.CUSTOM_NAME)) {
 			dogBowlEntity.setCustomName(itemStack.getHoverName());
 		}
 	}
 
 	@Override
-	public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
-		if(!world.isClientSide) {
+	protected InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
+		if(!world.isClientSide()) {
 			MenuProvider screenHandlerFactory = state.getMenuProvider(world, pos);
 
 			if(screenHandlerFactory != null) {

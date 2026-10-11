@@ -3,7 +3,7 @@ package net.lordmrk.dmo.entity.ai.goal;
 import net.lordmrk.dmo.entity.DoggoEntity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
-import net.minecraft.world.entity.animal.horse.Llama;
+import net.minecraft.world.entity.animal.equine.Llama;
 
 public class DoggoAvoidLlamaGoal<T extends LivingEntity> extends AvoidEntityGoal<T> {
 

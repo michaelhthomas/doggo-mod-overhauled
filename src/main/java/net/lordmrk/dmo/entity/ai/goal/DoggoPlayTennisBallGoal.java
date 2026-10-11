@@ -9,7 +9,7 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
+import net.minecraft.world.entity.projectile.throwableitemprojectile.ThrowableItemProjectile;
 import java.util.EnumSet;
 import java.util.List;
 

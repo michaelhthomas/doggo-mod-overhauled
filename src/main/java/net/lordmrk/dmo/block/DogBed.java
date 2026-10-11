@@ -1,24 +1,21 @@
 package net.lordmrk.dmo.block;
 
-import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.level.material.PushReaction;
-import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -43,8 +40,16 @@ public class DogBed extends HorizontalDirectionalBlock {
 
     //private final String name;
 
-    public DogBed(DyeColor color, WoodType woodType) {
-        super(FabricBlockSettings.create().sound(SoundType.WOOD).strength(0.2F).noOcclusion().ignitedByLava().pushReaction(PushReaction.DESTROY));
+    public DogBed(ResourceKey<Block> key, DyeColor color, WoodType woodType) {
+        super(BlockBehaviour.Properties.of()
+                .setId(key)
+                .sound(SoundType.WOOD)
+                .strength(0.2F)
+                .noOcclusion()
+                .ignitedByLava()
+                .pushReaction(PushReaction.POPPED)
+                .bounceRestitution(0.66F)
+                .fallDistanceReduction(0.5F));
 
         this.color = color;
         //String[] woodModColonName = woodType.name().split(":");
@@ -57,15 +62,6 @@ public class DogBed extends HorizontalDirectionalBlock {
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(BlockStateProperties.HORIZONTAL_FACING);
-    }
-
-    private void bounceEntity(Entity entity) {
-        Vec3 vec = entity.getDeltaMovement();
-
-        if (vec.y < 0.0D) {
-            double d = entity instanceof LivingEntity ? 1.0D : 0.8D;
-            entity.setDeltaMovement(vec.x, -vec.y * 0.6600000262260437D * d, vec.z);
-        }
     }
 
     public DyeColor getColor() {
@@ -105,21 +101,6 @@ public class DogBed extends HorizontalDirectionalBlock {
 
     public WoodType getWoodType() {
         return woodType;
-    }
-
-    @Override
-    public void updateEntityAfterFallOn(BlockGetter world, Entity entity) {
-        if(entity.isSuppressingBounce()) {
-            super.updateEntityAfterFallOn(world, entity);
-            return;
-        }
-
-        this.bounceEntity(entity);
-    }
-
-    @Override
-    public void fallOn(Level world, BlockState state, BlockPos pos, Entity entity, float fallDistance) {
-        super.fallOn(world, state, pos, entity, fallDistance * 0.5F);
     }
 
     static {

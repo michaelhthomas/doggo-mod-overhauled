@@ -4,13 +4,13 @@ import net.lordmrk.dmo.DoggoModOverhauled;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 
 public class DogBowlScreen extends AbstractContainerScreen<AbstractContainerMenu> {
 	
-	private static final ResourceLocation TEXTURE = new ResourceLocation(DoggoModOverhauled.MODID, "textures/gui/dog_bowl.png");
+	private static final Identifier TEXTURE = Identifier.fromNamespaceAndPath(DoggoModOverhauled.MODID, "textures/gui/dog_bowl.png");
 	
 	public DogBowlScreen(AbstractContainerMenu handler, Inventory inventory, Component title) {
 		super(handler, inventory, title);

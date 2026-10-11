@@ -4,9 +4,12 @@ import net.lordmrk.dmo.DoggoModOverhauled;
 import net.lordmrk.dmo.inventory.ImplementedInventory;
 import net.lordmrk.dmo.screen.DogBowlScreenHandler;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -16,12 +19,14 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.Nameable;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerListener;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 public class DogBowlEntity extends BlockEntity implements MenuProvider, ImplementedInventory,  ContainerListener, Nameable {
 
@@ -60,13 +65,13 @@ public class DogBowlEntity extends BlockEntity implements MenuProvider, Implemen
 			return 0;
 		}
 
-		Item item = itemStack.getItem();
+		FoodProperties food = itemStack.get(DataComponents.FOOD);
 
-		if(!item.isEdible()) {
+		if(food == null) {
 			return 0;
 		}
 
-		return item.getFoodProperties().getNutrition() * 4;
+		return food.nutrition() * 4;
 	}
 
 	@Override
@@ -98,25 +103,25 @@ public class DogBowlEntity extends BlockEntity implements MenuProvider, Implemen
 	}
 
 	@Override
-	public void load(CompoundTag nbt) {
+	protected void loadAdditional(ValueInput input) {
+		super.loadAdditional(input);
+
 		this.items.clear();
 
-		ContainerHelper.loadAllItems(nbt, this.items);
+		ContainerHelper.loadAllItems(input, this.items);
 
-		if(nbt.contains("CustomName", 8)) {
-			this.customName = Component.Serializer.fromJson(nbt.getString("CustomName"));
-		}
+		this.customName = input.read("CustomName", ComponentSerialization.CODEC).orElse(null);
 
 		this.setChanged();
 	}
 
 	@Override
-	public void saveAdditional(CompoundTag nbt) {
-		nbt = ContainerHelper.saveAllItems(nbt, this.items);
+	protected void saveAdditional(ValueOutput output) {
+		super.saveAdditional(output);
 
-		if(this.customName != null) {
-			nbt.putString("CustomName", Component.Serializer.toJson(this.customName));
-		}
+		ContainerHelper.saveAllItems(output, this.items);
+
+		output.storeNullable("CustomName", ComponentSerialization.CODEC, this.customName);
 	}
 
 	public boolean hasCustomName() {
@@ -135,28 +140,14 @@ public class DogBowlEntity extends BlockEntity implements MenuProvider, Implemen
 		this.customName = customName;
 	}
 
-//	public void fromClientTag(NbtCompound nbt) {
-//		DefaultedList<ItemStack> items = DefaultedList.ofSize(1, ItemStack.EMPTY);
-//
-//		Inventories.readNbt(nbt, items);
-//
-//		for(int i = 0; i < this.items.size(); i++) {
-//			this.items.set(i, items.get(i));
-//		}
-//
-//		if(nbt.contains("CustomName", 8)) {
-//			this.customName = Text.Serializer.fromJson(nbt.getString("CustomName"));
-//		}
-//	}
-
 	@Override
 	public Packet<ClientGamePacketListener> getUpdatePacket() {
 		return ClientboundBlockEntityDataPacket.create(this);
 	}
 
 	@Override
-	public CompoundTag getUpdateTag() {
-		return saveWithoutMetadata();
+	public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+		return saveCustomOnly(registries);
 	}
 
 	@Override

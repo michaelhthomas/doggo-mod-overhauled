@@ -1,30 +1,29 @@
 package net.lordmrk.dmo.item;
 
-import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.level.Level;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.block.Block;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
+import java.util.function.Consumer;
 
 public class DogBedItem extends BlockItem {
 
     //private final Text name;
 
-    public DogBedItem(Block block) {
-        super(block, new FabricItemSettings());
+    public DogBedItem(Block block, Item.Properties properties) {
+        super(block, properties);
 
         //this.name = block.getName();
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag context) {
-        tooltip.add(Component.literal("Decoration only for the time being.").withStyle(ChatFormatting.RED));
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, TooltipDisplay display, Consumer<Component> tooltip, TooltipFlag flag) {
+        tooltip.accept(Component.literal("Decoration only for the time being.").withStyle(ChatFormatting.RED));
     }
 /*
     @Override

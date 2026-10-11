@@ -10,17 +10,17 @@ import net.lordmrk.dmo.entity.DoggoEntity;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.HashMap;
 import java.util.Map;
 
 public class DoggoEntityRenderer extends MobRenderer<DoggoEntity, DoggoEntityModel<DoggoEntity>> {
 
-    private static final ResourceLocation WILD_TEXTURE = new ResourceLocation(DoggoModOverhauled.MODID, "textures/entity/doggo/doggo.png");
-    private static final ResourceLocation TAMED_TEXTURE = new ResourceLocation(DoggoModOverhauled.MODID, "textures/entity/doggo/doggo_tame.png");
-    private static final ResourceLocation ANGRY_TEXTURE = new ResourceLocation(DoggoModOverhauled.MODID, "textures/entity/doggo/doggo_angry.png");
-    private static final ResourceLocation SLEEPING_TEXTURE = new ResourceLocation(DoggoModOverhauled.MODID, "textures/entity/doggo/doggo_sleeping.png");
+    private static final Identifier WILD_TEXTURE = Identifier.fromNamespaceAndPath(DoggoModOverhauled.MODID, "textures/entity/doggo/doggo.png");
+    private static final Identifier TAMED_TEXTURE = Identifier.fromNamespaceAndPath(DoggoModOverhauled.MODID, "textures/entity/doggo/doggo_tame.png");
+    private static final Identifier ANGRY_TEXTURE = Identifier.fromNamespaceAndPath(DoggoModOverhauled.MODID, "textures/entity/doggo/doggo_angry.png");
+    private static final Identifier SLEEPING_TEXTURE = Identifier.fromNamespaceAndPath(DoggoModOverhauled.MODID, "textures/entity/doggo/doggo_sleeping.png");
 
     private final Map<DoggoAction, DoggoEntityModel<DoggoEntity>> doggoModels = new HashMap<>();
 
@@ -61,7 +61,7 @@ public class DoggoEntityRenderer extends MobRenderer<DoggoEntity, DoggoEntityMod
 
     }
 
-    public ResourceLocation getTextureLocation(DoggoEntity doggoEntity) {
+    public Identifier getTextureLocation(DoggoEntity doggoEntity) {
         if (doggoEntity.isTame()) {
             if (doggoEntity.isAction(DoggoAction.NAPPING) ||
                     doggoEntity.isAction(DoggoAction.STRETCHING) && doggoEntity.getAnimationTick() > 60 && doggoEntity.getAnimationTick() < 130) {

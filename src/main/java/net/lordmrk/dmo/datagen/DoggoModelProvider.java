@@ -19,7 +19,7 @@ import net.minecraft.data.models.model.ModelTemplate;
 import net.minecraft.data.models.model.ModelTemplates;
 import net.minecraft.data.models.model.TextureMapping;
 import net.minecraft.data.models.model.TextureSlot;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -53,8 +53,8 @@ public class DoggoModelProvider extends FabricModelProvider {
             String wood = bed.getWoodType().name();
             DyeColor color = bed.getColor();
 
-            ResourceLocation planks = new ResourceLocation("block/" + wood + "_planks");
-            ResourceLocation wool = new ResourceLocation("block/" + color.getName() + "_wool");
+            Identifier planks = Identifier.withDefaultNamespace("block/" + wood + "_planks");
+            Identifier wool = Identifier.withDefaultNamespace("block/" + color.getName() + "_wool");
 
             TextureMapping textures = new TextureMapping()
                     .put(BORDER, planks)
@@ -62,7 +62,7 @@ public class DoggoModelProvider extends FabricModelProvider {
                     .put(TextureSlot.PARTICLE, planks);
 
             ModelTemplate model = new ModelTemplate(Optional.of(modLoc("block/dog_bed")), Optional.empty(), BORDER, BED, TextureSlot.PARTICLE);
-            ResourceLocation modelId = model.create(modLoc("block/" + entry.getKey()), textures, generator.modelOutput);
+            Identifier modelId = model.create(modLoc("block/" + entry.getKey()), textures, generator.modelOutput);
 
             generator.blockStateOutput.accept(createBedBlockState(bed, modelId));
         }
@@ -71,11 +71,11 @@ public class DoggoModelProvider extends FabricModelProvider {
             DogBowl bowl = (DogBowl) entry.getValue();
             DyeColor color = bowl.getColor();
 
-            ResourceLocation concrete = new ResourceLocation("block/" + color.getName() + "_concrete");
+            Identifier concrete = Identifier.withDefaultNamespace("block/" + color.getName() + "_concrete");
             // The light gray bowl deliberately uses a gray bottom so it contrasts with its light gray side.
-            ResourceLocation bottom = color == DyeColor.LIGHT_GRAY
-                    ? new ResourceLocation("block/gray_concrete")
-                    : new ResourceLocation("block/light_gray_concrete");
+            Identifier bottom = color == DyeColor.LIGHT_GRAY
+                    ? Identifier.withDefaultNamespace("block/gray_concrete")
+                    : Identifier.withDefaultNamespace("block/light_gray_concrete");
 
             TextureMapping textures = new TextureMapping()
                     .put(TextureSlot.BOTTOM, bottom)
@@ -83,14 +83,14 @@ public class DoggoModelProvider extends FabricModelProvider {
                     .put(TextureSlot.PARTICLE, bottom);
 
             ModelTemplate model = new ModelTemplate(Optional.of(modLoc("block/dog_bowl")), Optional.empty(), TextureSlot.BOTTOM, TextureSlot.SIDE, TextureSlot.PARTICLE);
-            ResourceLocation modelId = model.create(modLoc("block/" + entry.getKey()), textures, generator.modelOutput);
+            Identifier modelId = model.create(modLoc("block/" + entry.getKey()), textures, generator.modelOutput);
 
             generator.blockStateOutput.accept(MultiVariantGenerator.multiVariant(bowl,
                     Variant.variant().with(VariantProperties.MODEL, modelId)));
         }
     }
 
-    private static MultiVariantGenerator createBedBlockState(Block bed, ResourceLocation modelId) {
+    private static MultiVariantGenerator createBedBlockState(Block bed, Identifier modelId) {
         PropertyDispatch.C1<Direction> variants = PropertyDispatch.property(BlockStateProperties.HORIZONTAL_FACING)
                 .select(Direction.EAST, rotated(modelId, VariantProperties.Rotation.R90))
                 .select(Direction.NORTH, Variant.variant().with(VariantProperties.MODEL, modelId))
@@ -100,7 +100,7 @@ public class DoggoModelProvider extends FabricModelProvider {
         return MultiVariantGenerator.multiVariant(bed).with(variants);
     }
 
-    private static Variant rotated(ResourceLocation modelId, VariantProperties.Rotation rotation) {
+    private static Variant rotated(Identifier modelId, VariantProperties.Rotation rotation) {
         return Variant.variant()
                 .with(VariantProperties.MODEL, modelId)
                 .with(VariantProperties.Y_ROT, rotation)
@@ -122,17 +122,17 @@ public class DoggoModelProvider extends FabricModelProvider {
         }
 
         // Legacy tennis ball uses the lime texture.
-        ModelTemplate legacy = new ModelTemplate(Optional.of(new ResourceLocation("item/generated")), Optional.empty(), TextureSlot.LAYER0);
+        ModelTemplate legacy = new ModelTemplate(Optional.of(Identifier.withDefaultNamespace("item/generated")), Optional.empty(), TextureSlot.LAYER0);
         legacy.create(ModelLocationUtils.getModelLocation(DoggoItems.TENNIS_BALL_LEGACY),
                 TextureMapping.singleSlot(TextureSlot.LAYER0, modLoc("item/tennis_ball_lime")),
                 generator.output);
     }
 
-    private static ModelTemplate parentModel(ResourceLocation parent) {
+    private static ModelTemplate parentModel(Identifier parent) {
         return new ModelTemplate(Optional.of(parent), Optional.empty());
     }
 
-    private static ResourceLocation modLoc(String path) {
-        return new ResourceLocation(DoggoModOverhauled.MODID, path);
+    private static Identifier modLoc(String path) {
+        return Identifier.fromNamespaceAndPath(DoggoModOverhauled.MODID, path);
     }
 }

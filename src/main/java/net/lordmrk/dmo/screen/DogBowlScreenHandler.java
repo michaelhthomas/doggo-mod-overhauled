@@ -1,6 +1,8 @@
 package net.lordmrk.dmo.screen;
 
 import net.lordmrk.dmo.DoggoModOverhauled;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
@@ -85,7 +87,7 @@ public class DogBowlScreenHandler extends AbstractContainerMenu {
         }
 
         public static boolean matches(ItemStack stack) {
-            return stack.getItem().isEdible() && stack.getItem().getFoodProperties().isMeat();
+            return stack.get(DataComponents.FOOD) != null && stack.is(ItemTags.MEAT);
         }
 
         public int getMaxStackSize() {

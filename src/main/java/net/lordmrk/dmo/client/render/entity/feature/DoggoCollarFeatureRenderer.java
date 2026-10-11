@@ -7,11 +7,11 @@ import net.lordmrk.dmo.entity.DoggoEntity;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class DoggoCollarFeatureRenderer extends RenderLayer<DoggoEntity, DoggoEntityModel<DoggoEntity>> {
 
-    private static final ResourceLocation SKIN = new ResourceLocation(DoggoModOverhauled.MODID, "textures/entity/doggo/doggo_collar.png");
+    private static final Identifier SKIN = Identifier.fromNamespaceAndPath(DoggoModOverhauled.MODID, "textures/entity/doggo/doggo_collar.png");
 
     public DoggoCollarFeatureRenderer(RenderLayerParent<DoggoEntity, DoggoEntityModel<DoggoEntity>> featureRendererContext) {
         super(featureRendererContext);

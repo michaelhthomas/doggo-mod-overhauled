@@ -9,7 +9,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.TamableAnimal;
-import net.minecraft.world.entity.animal.Wolf;
+import net.minecraft.world.entity.animal.wolf.Wolf;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;

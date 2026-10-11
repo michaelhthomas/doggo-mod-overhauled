@@ -7,7 +7,7 @@ import net.lordmrk.dmo.DoggoItems;
 import net.lordmrk.dmo.DoggoModOverhauled;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
@@ -48,6 +48,6 @@ public class DoggoItemTagProvider extends FabricTagProvider.ItemTagProvider {
     }
 
     private static TagKey<Item> tag(String path) {
-        return TagKey.create(Registries.ITEM, new ResourceLocation(DoggoModOverhauled.MODID, path));
+        return TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(DoggoModOverhauled.MODID, path));
     }
 }

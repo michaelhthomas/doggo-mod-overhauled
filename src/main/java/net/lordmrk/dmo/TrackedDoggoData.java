@@ -1,37 +1,20 @@
 package net.lordmrk.dmo;
 
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.syncher.EntityDataSerializer;
 
 public class TrackedDoggoData {
-	
-	public static final EntityDataSerializer<DoggoFeeling> DOGGO_FEELING = new EntityDataSerializer<>() {
-		
-		public void write(FriendlyByteBuf packetByteBuf, DoggoFeeling doggoFeeling) {
-			packetByteBuf.writeEnum(doggoFeeling);
-		}
 
-		public DoggoFeeling read(FriendlyByteBuf packetByteBuf) {
-			return packetByteBuf.readEnum(DoggoFeeling.class);
-		}
+	public static final EntityDataSerializer<DoggoFeeling> DOGGO_FEELING = forEnum(DoggoFeeling.class);
 
-		public DoggoFeeling copy(DoggoFeeling doggoFeeling) {
-			return doggoFeeling;
-		}
-	};
-	
-	public static final EntityDataSerializer<DoggoAction> DOGGO_ACTION = new EntityDataSerializer<>() {
-		
-		public void write(FriendlyByteBuf packetByteBuf, DoggoAction doggoAction) {
-			packetByteBuf.writeEnum(doggoAction);
-		}
+	public static final EntityDataSerializer<DoggoAction> DOGGO_ACTION = forEnum(DoggoAction.class);
 
-		public DoggoAction read(FriendlyByteBuf packetByteBuf) {
-			return packetByteBuf.readEnum(DoggoAction.class);
-		}
+	private static <T extends Enum<T>> EntityDataSerializer<T> forEnum(Class<T> enumClass) {
+		StreamCodec<RegistryFriendlyByteBuf, T> codec = StreamCodec.of(
+				(RegistryFriendlyByteBuf buf, T value) -> buf.writeEnum(value),
+				(RegistryFriendlyByteBuf buf) -> buf.readEnum(enumClass));
 
-		public DoggoAction copy(DoggoAction doggoAction) {
-			return doggoAction;
-		}
-	};
+		return EntityDataSerializer.forValueType(codec);
+	}
 }

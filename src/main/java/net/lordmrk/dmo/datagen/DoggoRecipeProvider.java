@@ -15,7 +15,7 @@ import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.data.recipes.ShapelessRecipeBuilder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
@@ -49,8 +49,8 @@ public class DoggoRecipeProvider extends FabricRecipeProvider {
             DyeColor color = bed.getColor();
             String wood = bed.getWoodType().name();
 
-            Item slab = BuiltInRegistries.ITEM.get(new ResourceLocation("minecraft", wood + "_slab"));
-            Item wool = BuiltInRegistries.ITEM.get(new ResourceLocation("minecraft", color.getName() + "_wool"));
+            Item slab = BuiltInRegistries.ITEM.get(Identifier.fromNamespaceAndPath("minecraft", wood + "_slab"));
+            Item wool = BuiltInRegistries.ITEM.get(Identifier.fromNamespaceAndPath("minecraft", color.getName() + "_wool"));
 
             ShapedRecipeBuilder.shaped(RecipeCategory.MISC, bed)
                     .pattern("WW")
@@ -118,10 +118,10 @@ public class DoggoRecipeProvider extends FabricRecipeProvider {
     }
 
     private static Item dye(DyeColor color) {
-        return BuiltInRegistries.ITEM.get(new ResourceLocation("minecraft", color.getName() + "_dye"));
+        return BuiltInRegistries.ITEM.get(Identifier.fromNamespaceAndPath("minecraft", color.getName() + "_dye"));
     }
 
-    private static ResourceLocation modId(String path) {
-        return new ResourceLocation(DoggoModOverhauled.MODID, path);
+    private static Identifier modId(String path) {
+        return Identifier.fromNamespaceAndPath(DoggoModOverhauled.MODID, path);
     }
 }

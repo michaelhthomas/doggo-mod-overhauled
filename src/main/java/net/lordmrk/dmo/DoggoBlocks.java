@@ -1,18 +1,19 @@
 package net.lordmrk.dmo;
 
-import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
-import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.lordmrk.dmo.block.DogBed;
 import net.lordmrk.dmo.block.DogBowl;
 import net.lordmrk.dmo.item.DogBedItem;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
@@ -48,14 +49,14 @@ public class DoggoBlocks {
     public static final List<AbstractMap.SimpleEntry<String, Block>> BOWL_LIST = new ArrayList<>();
 
     private static void addToItemGroup(ResourceKey<CreativeModeTab> registryKey, List<AbstractMap.SimpleEntry<String, Block>> blockList, ItemLike addAfter) {
-        ItemGroupEvents.modifyEntriesEvent(registryKey).register(content -> {
+        CreativeModeTabEvents.modifyOutputEvent(registryKey).register(content -> {
             ItemLike lastItem = addAfter;
 
             for(AbstractMap.SimpleEntry<String, Block> entry : blockList) {
                 if(lastItem == null) {
                     content.accept(entry.getValue());
                 } else {
-                    content.addAfter(lastItem, entry.getValue());
+                    content.insertAfter(lastItem, entry.getValue());
                 }
 
                 lastItem = entry.getValue();
@@ -66,21 +67,21 @@ public class DoggoBlocks {
     public static void addToColoredBlocksItemGroup() {
         ResourceKey<CreativeModeTab> registryKey = CreativeModeTabs.COLORED_BLOCKS;
 
-        addToItemGroup(registryKey, BED_LIST, Items.PINK_BANNER);
+        addToItemGroup(registryKey, BED_LIST, Items.BANNER.pick(DyeColor.PINK));
         addToItemGroup(registryKey, BOWL_LIST, BED_LIST.get(BED_LIST.size() - 1).getValue());
     }
 
     public static void addToDoggoModItemGroup() {
         ResourceKey<CreativeModeTab> registryKey = DoggoItemGroups.DOG_STUFF_REGISTRY_KEY;
 
-        addToItemGroup(registryKey, BED_LIST, Items.PINK_BANNER);
+        addToItemGroup(registryKey, BED_LIST, Items.BANNER.pick(DyeColor.PINK));
         addToItemGroup(registryKey, BOWL_LIST, BED_LIST.get(BED_LIST.size() - 1).getValue());
     }
 
     public static void addToFunctionalBlocksItemGroup() {
         ResourceKey<CreativeModeTab> registryKey = CreativeModeTabs.FUNCTIONAL_BLOCKS;
 
-        addToItemGroup(registryKey, BED_LIST, Items.PINK_BANNER);
+        addToItemGroup(registryKey, BED_LIST, Items.BANNER.pick(DyeColor.PINK));
         addToItemGroup(registryKey, BOWL_LIST, BED_LIST.get(BED_LIST.size() - 1).getValue());
     }
 
@@ -116,19 +117,29 @@ public class DoggoBlocks {
     }
 
     private static void registerBlock(String id, Block block) {
-        Registry.register(BuiltInRegistries.BLOCK, new ResourceLocation(DoggoModOverhauled.MODID, id), block);
+        Identifier identifier = Identifier.fromNamespaceAndPath(DoggoModOverhauled.MODID, id);
+        Registry.register(BuiltInRegistries.BLOCK, identifier, block);
+
+        Item.Properties properties = new Item.Properties().setId(itemKey(id)).useBlockDescriptionPrefix();
 
         if(block instanceof DogBed) {
-            Registry.register(BuiltInRegistries.ITEM, new ResourceLocation(DoggoModOverhauled.MODID, id), new DogBedItem(block));
+            Registry.register(BuiltInRegistries.ITEM, identifier, new DogBedItem(block, properties));
             return;
         }
 
-        Registry.register(BuiltInRegistries.ITEM, new ResourceLocation(DoggoModOverhauled.MODID, id), new BlockItem(block, new FabricItemSettings()));
+        Registry.register(BuiltInRegistries.ITEM, identifier, new BlockItem(block, properties));
+    }
+
+    public static ResourceKey<Block> blockKey(String id) {
+        return ResourceKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath(DoggoModOverhauled.MODID, id));
+    }
+
+    public static ResourceKey<Item> itemKey(String id) {
+        return ResourceKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(DoggoModOverhauled.MODID, id));
     }
 
     static {
         for(WoodType woodType : WoodType.values().toList()) {
-            //String woodTypeName = woodType.name().replaceAll(":", "_");
             String woodTypeName = woodType.name();
 
             if(woodTypeName.contains(":")) {
@@ -136,12 +147,14 @@ public class DoggoBlocks {
             }
 
             for(DyeColor color : COLORS) {
-                BED_LIST.add(new AbstractMap.SimpleEntry<>("dog_bed_" + woodTypeName + "_" + color.getName(), new DogBed(color, woodType)));
+                String id = "dog_bed_" + woodTypeName + "_" + color.getName();
+                BED_LIST.add(new AbstractMap.SimpleEntry<>(id, new DogBed(blockKey(id), color, woodType)));
             }
         }
 
         for(DyeColor color : COLORS) {
-            BOWL_LIST.add(new AbstractMap.SimpleEntry<>("dog_bowl_" + color.getName(), new DogBowl(color)));
+            String id = "dog_bowl_" + color.getName();
+            BOWL_LIST.add(new AbstractMap.SimpleEntry<>(id, new DogBowl(blockKey(id), color)));
         }
     }
 }

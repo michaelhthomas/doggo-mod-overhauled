@@ -1,26 +1,28 @@
 package net.lordmrk.dmo;
 
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.lordmrk.dmo.block.entity.DogBowlEntity;
 import net.lordmrk.dmo.screen.DogBowlScreenHandler;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.syncher.EntityDataSerializers;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Set;
 
 public class DoggoModOverhauled implements ModInitializer {
 
 	public static final String MODID = "doggomodoverhauled";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MODID);
 
-	public static final ResourceLocation JADE_DOG_BOWL = new ResourceLocation(MODID, "dog_bowl");
-	public static final ResourceLocation DOG_BOWL = new ResourceLocation(MODID, "dog_bowl_entity");
+	public static final Identifier JADE_DOG_BOWL = Identifier.fromNamespaceAndPath(MODID, "dog_bowl");
+	public static final Identifier DOG_BOWL = Identifier.fromNamespaceAndPath(MODID, "dog_bowl_entity");
 	public static BlockEntityType<DogBowlEntity> DOG_BOWL_ENTITY;
 	public static final MenuType<DogBowlScreenHandler> DOG_BOWL_SCREEN_HANDLER;
 
@@ -42,9 +44,7 @@ public class DoggoModOverhauled implements ModInitializer {
 		DOG_BOWL_ENTITY = Registry.register(
 				BuiltInRegistries.BLOCK_ENTITY_TYPE,
 				DOG_BOWL,
-				FabricBlockEntityTypeBuilder.create(
-						DogBowlEntity::new,
-						DoggoBlocks.getDogBowls()).build(null));
+				new BlockEntityType<>(DogBowlEntity::new, Set.<Block>of(DoggoBlocks.getDogBowls())));
 
 		EntityDataSerializers.registerSerializer(TrackedDoggoData.DOGGO_ACTION);
 		EntityDataSerializers.registerSerializer(TrackedDoggoData.DOGGO_FEELING);

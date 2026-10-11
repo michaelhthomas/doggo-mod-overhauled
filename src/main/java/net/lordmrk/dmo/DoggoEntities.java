@@ -1,13 +1,13 @@
 package net.lordmrk.dmo;
 
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
-import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 import net.lordmrk.dmo.entity.DoggoEntity;
 import net.lordmrk.dmo.entity.projectile.thrown.*;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.EntityDimensions;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.player.Player;
@@ -41,10 +41,10 @@ public class DoggoEntities {
     public static void registerAll() {
         DOGGO_ENTITY = Registry.register(
                 BuiltInRegistries.ENTITY_TYPE,
-                new ResourceLocation(DoggoModOverhauled.MODID, "doggo"),
-                FabricEntityTypeBuilder.create(MobCategory.CREATURE, DoggoEntity::new)
-                        .dimensions(EntityDimensions.fixed(0.6F, 0.85F))
-                        .build());
+                key("doggo"),
+                EntityType.Builder.of(DoggoEntity::new, MobCategory.CREATURE)
+                        .sized(0.6F, 0.85F)
+                        .build(key("doggo")));
 
         TENNIS_BALL_RED_ENTITY = registerTennisBall(DyeColor.RED, RedTennisBallEntity::new);
         TENNIS_BALL_YELLOW_ENTITY = registerTennisBall(DyeColor.YELLOW, YellowTennisBallEntity::new);
@@ -55,11 +55,17 @@ public class DoggoEntities {
     }
 
     private static <T extends AbstractTennisBallEntity> EntityType<T> registerTennisBall(DyeColor color, EntityType.EntityFactory<T> entityFactory) {
+        Identifier id = Identifier.fromNamespaceAndPath(DoggoModOverhauled.MODID, "tennis_ball_" + color.getName() + "_entity");
+
         return Registry.register(
                 BuiltInRegistries.ENTITY_TYPE,
-                new ResourceLocation(DoggoModOverhauled.MODID, "tennis_ball_" + color.getName() + "_entity"),
-                FabricEntityTypeBuilder.create(MobCategory.MISC, entityFactory)
-                        .dimensions(EntityDimensions.fixed(0.25F, 0.25F))
-                        .trackRangeBlocks(4).trackedUpdateRate(10).build());
+                id,
+                EntityType.Builder.of(entityFactory, MobCategory.MISC)
+                        .sized(0.25F, 0.25F)
+                        .clientTrackingRange(4).updateInterval(10).build(ResourceKey.create(Registries.ENTITY_TYPE, id)));
+    }
+
+    private static ResourceKey<EntityType<?>> key(String id) {
+        return ResourceKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(DoggoModOverhauled.MODID, id));
     }
 }

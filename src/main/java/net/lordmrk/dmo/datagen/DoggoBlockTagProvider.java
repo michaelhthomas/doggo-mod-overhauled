@@ -6,7 +6,7 @@ import net.lordmrk.dmo.DoggoBlocks;
 import net.lordmrk.dmo.DoggoModOverhauled;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
@@ -42,6 +42,6 @@ public class DoggoBlockTagProvider extends FabricTagProvider.BlockTagProvider {
     }
 
     private static TagKey<Block> tag(String path) {
-        return TagKey.create(Registries.BLOCK, new ResourceLocation(DoggoModOverhauled.MODID, path));
+        return TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath(DoggoModOverhauled.MODID, path));
     }
 }

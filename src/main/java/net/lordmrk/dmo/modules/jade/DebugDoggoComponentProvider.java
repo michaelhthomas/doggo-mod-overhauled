@@ -4,7 +4,7 @@ import net.lordmrk.dmo.DoggoAction;
 import net.lordmrk.dmo.entity.DoggoEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import snownee.jade.api.EntityAccessor;
 import snownee.jade.api.IEntityComponentProvider;
 import snownee.jade.api.IServerDataProvider;
@@ -15,7 +15,7 @@ public enum DebugDoggoComponentProvider implements IEntityComponentProvider, ISe
 
     INSTANCE;
 
-    private static ResourceLocation identifier = new ResourceLocation("debug");
+    private static Identifier identifier = Identifier.withDefaultNamespace("debug");
     private static String KEY_ACTION = "Action";
     private static String KEY_GOAL_DELAY = "GoalDelay";
 
@@ -40,7 +40,7 @@ public enum DebugDoggoComponentProvider implements IEntityComponentProvider, ISe
     }
 
     @Override
-    public ResourceLocation getUid() {
+    public Identifier getUid() {
         return identifier;
     }
 }

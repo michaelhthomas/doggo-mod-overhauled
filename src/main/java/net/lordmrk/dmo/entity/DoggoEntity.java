@@ -47,12 +47,12 @@ import net.minecraft.world.entity.ai.goal.target.NonTameRandomTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.ResetUniversalAngerTargetGoal;
-import net.minecraft.world.entity.animal.Turtle;
-import net.minecraft.world.entity.animal.Wolf;
-import net.minecraft.world.entity.animal.horse.AbstractHorse;
-import net.minecraft.world.entity.animal.horse.Llama;
+import net.minecraft.world.entity.animal.turtle.Turtle;
+import net.minecraft.world.entity.animal.wolf.Wolf;
+import net.minecraft.world.entity.animal.equine.AbstractHorse;
+import net.minecraft.world.entity.animal.equine.Llama;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.AbstractSkeleton;
+import net.minecraft.world.entity.monster.skeleton.AbstractSkeleton;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Ghast;
 import net.minecraft.world.entity.player.Player;
@@ -66,7 +66,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
@@ -122,8 +122,8 @@ public class DoggoEntity extends TamableAnimal implements NeutralMob {
         this.setTame(true);
         this.setOrderedToSit(true);
         this.setInSittingPose(true);
-        this.setPathfindingMalus(BlockPathTypes.POWDER_SNOW, -1.0F);
-        this.setPathfindingMalus(BlockPathTypes.DANGER_POWDER_SNOW, -1.0F);
+        this.setPathfindingMalus(PathType.POWDER_SNOW, -1.0F);
+        this.setPathfindingMalus(PathType.DANGER_POWDER_SNOW, -1.0F);
     }
 
     @Override

@@ -5,7 +5,7 @@ import net.lordmrk.dmo.entity.DoggoEntity;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
+import net.minecraft.world.entity.projectile.throwableitemprojectile.ThrowableItemProjectile;
 import java.util.EnumSet;
 import java.util.List;
 
