@@ -1,29 +1,29 @@
 package net.lordmrk.dmo.screen;
 
 import net.lordmrk.dmo.DoggoModOverhauled;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.slot.Slot;
+import net.minecraft.world.Container;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 
-public class DogBowlScreenHandler extends ScreenHandler {
+public class DogBowlScreenHandler extends AbstractContainerMenu {
 
-    private final Inventory inv;
+    private final Container inv;
 
-    public DogBowlScreenHandler(int syncId, PlayerInventory playerInv) {
-        this(syncId, playerInv, new SimpleInventory(1));
+    public DogBowlScreenHandler(int syncId, Inventory playerInv) {
+        this(syncId, playerInv, new SimpleContainer(1));
     }
 
-    public DogBowlScreenHandler(int syncId, PlayerInventory playerInv, Inventory inv) {
+    public DogBowlScreenHandler(int syncId, Inventory playerInv, Container inv) {
         super(DoggoModOverhauled.DOG_BOWL_SCREEN_HANDLER, syncId);
 
-        checkSize(inv, 1);
+        checkContainerSize(inv, 1);
         this.inv = inv;
 
-        inv.onOpen(playerInv.player);
+        inv.startOpen(playerInv.player);
 
         //Our inventory
         this.addSlot(new DogFoodSlot(inv, 0, 80, 17));
@@ -42,30 +42,30 @@ public class DogBowlScreenHandler extends ScreenHandler {
     }
 
     @Override
-    public boolean canUse(PlayerEntity player) {
-        return inv.canPlayerUse(player);
+    public boolean stillValid(Player player) {
+        return inv.stillValid(player);
     }
 
     @Override
-    public ItemStack quickMove(PlayerEntity player, int invSlot) {
+    public ItemStack quickMoveStack(Player player, int invSlot) {
         Slot slot = this.slots.get(invSlot);
 
-        if (slot.hasStack()) {
-            ItemStack originalStack = slot.getStack();
+        if (slot.hasItem()) {
+            ItemStack originalStack = slot.getItem();
             ItemStack newStack = originalStack.copy();
 
-            if (invSlot < this.inv.size()) {
-                if (!this.insertItem(originalStack, this.inv.size(), this.slots.size(), true)) {
+            if (invSlot < this.inv.getContainerSize()) {
+                if (!this.moveItemStackTo(originalStack, this.inv.getContainerSize(), this.slots.size(), true)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (!this.insertItem(originalStack, 0, this.inv.size(), false)) {
+            } else if (!this.moveItemStackTo(originalStack, 0, this.inv.getContainerSize(), false)) {
                 return ItemStack.EMPTY;
             }
 
             if (originalStack.isEmpty()) {
-                slot.setStack(ItemStack.EMPTY);
+                slot.setByPlayer(ItemStack.EMPTY);
             } else {
-                slot.markDirty();
+                slot.setChanged();
             }
 
             return newStack;
@@ -76,19 +76,19 @@ public class DogBowlScreenHandler extends ScreenHandler {
 
     static class DogFoodSlot extends Slot {
 
-        public DogFoodSlot(Inventory inventory, int index, int x, int y) {
+        public DogFoodSlot(Container inventory, int index, int x, int y) {
             super(inventory, index, x, y);
         }
 
-        public boolean canInsert(ItemStack stack) {
+        public boolean mayPlace(ItemStack stack) {
             return matches(stack);
         }
 
         public static boolean matches(ItemStack stack) {
-            return stack.getItem().isFood() && stack.getItem().getFoodComponent().isMeat();
+            return stack.getItem().isEdible() && stack.getItem().getFoodProperties().isMeat();
         }
 
-        public int getMaxItemCount() {
+        public int getMaxStackSize() {
             return 64;
         }
     }

@@ -1,8 +1,7 @@
 package net.lordmrk.dmo.entity.ai.goal;
 
 import net.lordmrk.dmo.entity.DoggoEntity;
-import net.minecraft.entity.ai.goal.Goal;
-
+import net.minecraft.world.entity.ai.goal.Goal;
 import java.util.EnumSet;
 
 public class DoggoLieDownGoal extends Goal {
@@ -12,16 +11,16 @@ public class DoggoLieDownGoal extends Goal {
 
     public DoggoLieDownGoal(DoggoEntity doggoEntity) {
         this.doggoEntity = doggoEntity;
-        this.setControls(EnumSet.of(Control.JUMP, Control.MOVE));
+        this.setFlags(EnumSet.of(Flag.JUMP, Flag.MOVE));
     }
 
     @Override
-    public boolean shouldContinue() {
-        return !canStop();
+    public boolean canContinueToUse() {
+        return !isInterruptable();
     }
 
     @Override
-    public boolean canStart() {
+    public boolean canUse() {
         if(!this.doggoEntity.shouldGoalStart()) {
             return false;
         }
@@ -34,7 +33,7 @@ public class DoggoLieDownGoal extends Goal {
     }
 
     @Override
-    public boolean canStop() {
+    public boolean isInterruptable() {
         if(this.actionTick <= 0) {
             return true;
         }

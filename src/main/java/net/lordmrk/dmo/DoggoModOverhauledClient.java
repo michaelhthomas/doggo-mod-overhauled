@@ -10,21 +10,20 @@ import net.lordmrk.dmo.client.gui.screen.ingame.DogBowlScreen;
 import net.lordmrk.dmo.client.render.block.entity.DogBowlBlockEntityRenderer;
 import net.lordmrk.dmo.client.render.entity.DoggoEntityRenderer;
 import net.lordmrk.dmo.client.render.entity.model.DoggoEntityModel;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.entity.FlyingItemEntityRenderer;
-import net.minecraft.client.render.entity.model.EntityModelLayer;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.registry.Registries;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.Vec3d;
-
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.geom.ModelLayerLocation;
+import net.minecraft.client.renderer.entity.ThrownItemRenderer;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.phys.Vec3;
 import java.util.UUID;
 
 public class DoggoModOverhauledClient implements ClientModInitializer {
 
-    public static final EntityModelLayer DOGGO = new EntityModelLayer(new Identifier(DoggoModOverhauled.MODID, "doggo"), "main");
-    public static final Identifier PacketID = new Identifier(DoggoModOverhauled.MODID, "spawn_packet");
+    public static final ModelLayerLocation DOGGO = new ModelLayerLocation(new ResourceLocation(DoggoModOverhauled.MODID, "doggo"), "main");
+    public static final ResourceLocation PacketID = new ResourceLocation(DoggoModOverhauled.MODID, "spawn_packet");
 
     @Override
     public void onInitializeClient() {
@@ -34,35 +33,35 @@ public class DoggoModOverhauledClient implements ClientModInitializer {
         BlockEntityRendererRegistry.register(DoggoModOverhauled.DOG_BOWL_ENTITY, DogBowlBlockEntityRenderer::new);
         ScreenRegistry.register(DoggoModOverhauled.DOG_BOWL_SCREEN_HANDLER, DogBowlScreen::new);
 
-        EntityRendererRegistry.register(DoggoEntities.TENNIS_BALL_RED_ENTITY, FlyingItemEntityRenderer::new);
-        EntityRendererRegistry.register(DoggoEntities.TENNIS_BALL_YELLOW_ENTITY, FlyingItemEntityRenderer::new);
-        EntityRendererRegistry.register(DoggoEntities.TENNIS_BALL_LIME_ENTITY, FlyingItemEntityRenderer::new);
-        EntityRendererRegistry.register(DoggoEntities.TENNIS_BALL_LIGHT_BLUE_ENTITY, FlyingItemEntityRenderer::new);
+        EntityRendererRegistry.register(DoggoEntities.TENNIS_BALL_RED_ENTITY, ThrownItemRenderer::new);
+        EntityRendererRegistry.register(DoggoEntities.TENNIS_BALL_YELLOW_ENTITY, ThrownItemRenderer::new);
+        EntityRendererRegistry.register(DoggoEntities.TENNIS_BALL_LIME_ENTITY, ThrownItemRenderer::new);
+        EntityRendererRegistry.register(DoggoEntities.TENNIS_BALL_LIGHT_BLUE_ENTITY, ThrownItemRenderer::new);
 
         receiveEntityPacket();
     }
 
     private void receiveEntityPacket() {
         ClientPlayNetworking.registerGlobalReceiver(PacketID, (client, handler, byteBuf, sender) -> {
-            EntityType<?> et = Registries.ENTITY_TYPE.get(byteBuf.readVarInt());
-            UUID uuid = byteBuf.readUuid();
+            EntityType<?> et = BuiltInRegistries.ENTITY_TYPE.byId(byteBuf.readVarInt());
+            UUID uuid = byteBuf.readUUID();
             int entityId = byteBuf.readVarInt();
-            Vec3d pos = EntitySpawnPacket.PacketBufUtil.readVec3d(byteBuf);
+            Vec3 pos = EntitySpawnPacket.PacketBufUtil.readVec3d(byteBuf);
             float pitch = EntitySpawnPacket.PacketBufUtil.readAngle(byteBuf);
             float yaw = EntitySpawnPacket.PacketBufUtil.readAngle(byteBuf);
 
-            if (MinecraftClient.getInstance().world == null)
+            if (Minecraft.getInstance().level == null)
                 throw new IllegalStateException("Tried to spawn entity in a null world!");
-            Entity entity = et.create(MinecraftClient.getInstance().world);
+            Entity entity = et.create(Minecraft.getInstance().level);
             if (entity == null)
-                throw new IllegalStateException("Failed to create instance of entity \"" + Registries.ENTITY_TYPE.getId(et) + "\"!");
-            entity.updateTrackedPosition(pos.x, pos.y, pos.z);
-            entity.setPos(pos.x, pos.y, pos.z);
-            entity.setPitch(pitch);
-            entity.setYaw(yaw);
+                throw new IllegalStateException("Failed to create instance of entity \"" + BuiltInRegistries.ENTITY_TYPE.getKey(et) + "\"!");
+            entity.syncPacketPositionCodec(pos.x, pos.y, pos.z);
+            entity.setPosRaw(pos.x, pos.y, pos.z);
+            entity.setXRot(pitch);
+            entity.setYRot(yaw);
             entity.setId(entityId);
-            entity.setUuid(uuid);
-            MinecraftClient.getInstance().world.addEntity(entity);
+            entity.setUUID(uuid);
+            Minecraft.getInstance().level.addEntity(entity);
         });
     }
 }

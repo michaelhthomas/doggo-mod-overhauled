@@ -4,15 +4,15 @@ import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRe
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 import net.lordmrk.dmo.entity.DoggoEntity;
 import net.lordmrk.dmo.entity.projectile.thrown.*;
-import net.minecraft.entity.EntityDimensions;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.SpawnGroup;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.util.DyeColor;
-import net.minecraft.util.Identifier;
-import net.minecraft.world.World;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EntityDimensions;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.level.Level;
 
 public class DoggoEntities {
 
@@ -23,7 +23,7 @@ public class DoggoEntities {
 
     public static EntityType<DoggoEntity> DOGGO_ENTITY;
 
-    public static AbstractTennisBallEntity newTennisBall(World world, PlayerEntity user, DyeColor color) {
+    public static AbstractTennisBallEntity newTennisBall(Level world, Player user, DyeColor color) {
         switch(color) {
             case RED:
                 return new RedTennisBallEntity(world, user);
@@ -40,9 +40,9 @@ public class DoggoEntities {
 
     public static void registerAll() {
         DOGGO_ENTITY = Registry.register(
-                Registries.ENTITY_TYPE,
-                new Identifier(DoggoModOverhauled.MODID, "doggo"),
-                FabricEntityTypeBuilder.create(SpawnGroup.CREATURE, DoggoEntity::new)
+                BuiltInRegistries.ENTITY_TYPE,
+                new ResourceLocation(DoggoModOverhauled.MODID, "doggo"),
+                FabricEntityTypeBuilder.create(MobCategory.CREATURE, DoggoEntity::new)
                         .dimensions(EntityDimensions.fixed(0.6F, 0.85F))
                         .build());
 
@@ -56,9 +56,9 @@ public class DoggoEntities {
 
     private static <T extends AbstractTennisBallEntity> EntityType<T> registerTennisBall(DyeColor color, EntityType.EntityFactory<T> entityFactory) {
         return Registry.register(
-                Registries.ENTITY_TYPE,
-                new Identifier(DoggoModOverhauled.MODID, "tennis_ball_" + color.getName() + "_entity"),
-                FabricEntityTypeBuilder.create(SpawnGroup.MISC, entityFactory)
+                BuiltInRegistries.ENTITY_TYPE,
+                new ResourceLocation(DoggoModOverhauled.MODID, "tennis_ball_" + color.getName() + "_entity"),
+                FabricEntityTypeBuilder.create(MobCategory.MISC, entityFactory)
                         .dimensions(EntityDimensions.fixed(0.25F, 0.25F))
                         .trackRangeBlocks(4).trackedUpdateRate(10).build());
     }

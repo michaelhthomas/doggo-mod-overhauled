@@ -2,19 +2,19 @@ package net.lordmrk.dmo.entity.projectile.thrown;
 
 import net.lordmrk.dmo.DoggoEntities;
 import net.lordmrk.dmo.DoggoItems;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.Item;
-import net.minecraft.util.DyeColor;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.Level;
 
 public class LimeTennisBallEntity extends AbstractTennisBallEntity {
 
-    public LimeTennisBallEntity(EntityType<? extends AbstractTennisBallEntity> entityType, World world) {
+    public LimeTennisBallEntity(EntityType<? extends AbstractTennisBallEntity> entityType, Level world) {
         super(entityType, world);
     }
 
-    public LimeTennisBallEntity(World world, LivingEntity owner) {
+    public LimeTennisBallEntity(Level world, LivingEntity owner) {
         super(DoggoEntities.TENNIS_BALL_LIME_ENTITY, world, owner);
     }
 

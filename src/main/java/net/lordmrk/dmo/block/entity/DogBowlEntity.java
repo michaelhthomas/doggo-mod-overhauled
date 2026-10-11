@@ -3,50 +3,49 @@ package net.lordmrk.dmo.block.entity;
 import net.lordmrk.dmo.DoggoModOverhauled;
 import net.lordmrk.dmo.inventory.ImplementedInventory;
 import net.lordmrk.dmo.screen.DogBowlScreenHandler;
-import net.minecraft.item.Item;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.NonNullList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.ContainerHelper;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.Nameable;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerListener;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.Inventories;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.NamedScreenHandlerFactory;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.ScreenHandlerListener;
-import net.minecraft.text.Text;
-import net.minecraft.util.Nameable;
-import net.minecraft.util.collection.DefaultedList;
+public class DogBowlEntity extends BlockEntity implements MenuProvider, ImplementedInventory,  ContainerListener, Nameable {
 
-public class DogBowlEntity extends BlockEntity implements NamedScreenHandlerFactory, ImplementedInventory,  ScreenHandlerListener, Nameable {
-
-	private final DefaultedList<ItemStack> items = DefaultedList.ofSize(1, ItemStack.EMPTY);
-	private Text customName;
+	private final NonNullList<ItemStack> items = NonNullList.withSize(1, ItemStack.EMPTY);
+	private Component customName;
 
 	public DogBowlEntity(BlockPos pos, BlockState state) {
 		super(DoggoModOverhauled.DOG_BOWL_ENTITY, pos, state);
 	}
 
 	@Override
-	public ScreenHandler createMenu(int syncId, PlayerInventory inv, PlayerEntity player) {
+	public AbstractContainerMenu createMenu(int syncId, Inventory inv, Player player) {
 		DogBowlScreenHandler handler = new DogBowlScreenHandler(syncId, inv, this);
-		handler.addListener(this);
+		handler.addSlotListener(this);
 		return handler;
 	}
 
 	@Override
-	public Text getCustomName() {
+	public Component getCustomName() {
 		return this.customName;
 	}
 
 	@Override
-	public Text getDisplayName() {
+	public Component getDisplayName() {
 		return this.getName();
 	}
 
@@ -63,24 +62,24 @@ public class DogBowlEntity extends BlockEntity implements NamedScreenHandlerFact
 
 		Item item = itemStack.getItem();
 
-		if(!item.isFood()) {
+		if(!item.isEdible()) {
 			return 0;
 		}
 
-		return item.getFoodComponent().getHunger() * 4;
+		return item.getFoodProperties().getNutrition() * 4;
 	}
 
 	@Override
-	public DefaultedList<ItemStack> getItems() {
+	public NonNullList<ItemStack> getItems() {
 		return items;
 	}
 
-	public Text getName() {
+	public Component getName() {
 		if (this.customName == null) {
-			return Text.translatable("block.doggomodoverhauled.dog_bowl_entity");
+			return Component.translatable("block.doggomodoverhauled.dog_bowl_entity");
 		}
 
-		return Text.translatable("block.doggomodoverhauled.named_dog_bowl_entity", this.customName.getString());
+		return Component.translatable("block.doggomodoverhauled.named_dog_bowl_entity", this.customName.getString());
 	}
 
 	public void foodEaten() {
@@ -94,29 +93,29 @@ public class DogBowlEntity extends BlockEntity implements NamedScreenHandlerFact
 			return;
 		}
 
-		itemStack.decrement(1);
-		this.markDirty();
+		itemStack.shrink(1);
+		this.setChanged();
 	}
 
 	@Override
-	public void readNbt(NbtCompound nbt) {
+	public void load(CompoundTag nbt) {
 		this.items.clear();
 
-		Inventories.readNbt(nbt, this.items);
+		ContainerHelper.loadAllItems(nbt, this.items);
 
 		if(nbt.contains("CustomName", 8)) {
-			this.customName = Text.Serializer.fromJson(nbt.getString("CustomName"));
+			this.customName = Component.Serializer.fromJson(nbt.getString("CustomName"));
 		}
 
-		this.markDirty();
+		this.setChanged();
 	}
 
 	@Override
-	public void writeNbt(NbtCompound nbt) {
-		nbt = Inventories.writeNbt(nbt, this.items);
+	public void saveAdditional(CompoundTag nbt) {
+		nbt = ContainerHelper.saveAllItems(nbt, this.items);
 
 		if(this.customName != null) {
-			nbt.putString("CustomName", Text.Serializer.toJson(this.customName));
+			nbt.putString("CustomName", Component.Serializer.toJson(this.customName));
 		}
 	}
 
@@ -132,7 +131,7 @@ public class DogBowlEntity extends BlockEntity implements NamedScreenHandlerFact
 		return !items.get(0).isEmpty();
 	}
 
-	public void setCustomName(Text customName) {
+	public void setCustomName(Component customName) {
 		this.customName = customName;
 	}
 
@@ -151,38 +150,38 @@ public class DogBowlEntity extends BlockEntity implements NamedScreenHandlerFact
 //	}
 
 	@Override
-	public Packet<ClientPlayPacketListener> toUpdatePacket() {
-		return BlockEntityUpdateS2CPacket.create(this);
+	public Packet<ClientGamePacketListener> getUpdatePacket() {
+		return ClientboundBlockEntityDataPacket.create(this);
 	}
 
 	@Override
-	public NbtCompound toInitialChunkDataNbt() {
-		return createNbt();
+	public CompoundTag getUpdateTag() {
+		return saveWithoutMetadata();
 	}
 
 	@Override
-	public void markDirty() {
-		if (this.world == null) {
+	public void setChanged() {
+		if (this.level == null) {
 			return;
 		}
 
-		this.world.markDirty(this.pos);
+		this.level.blockEntityChanged(this.worldPosition);
 
-		if (this.world.isClient()) {
+		if (this.level.isClientSide()) {
 			return;
 		}
 
-		((ServerWorld) this.world).getChunkManager().markForUpdate(pos); // Mark changes to be synced to the client.
+		((ServerLevel) this.level).getChunkSource().blockChanged(worldPosition); // Mark changes to be synced to the client.
 	}
 
 
 	@Override
-	public void onSlotUpdate(ScreenHandler handler, int slotId, ItemStack stack) {
+	public void slotChanged(AbstractContainerMenu handler, int slotId, ItemStack stack) {
 
 	}
 
 	@Override
-	public void onPropertyUpdate(ScreenHandler handler, int property, int value) {
+	public void dataChanged(AbstractContainerMenu handler, int property, int value) {
 
 	}
 }

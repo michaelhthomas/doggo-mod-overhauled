@@ -1,42 +1,42 @@
 package net.lordmrk.dmo.client.gui.screen.ingame;
 
 import net.lordmrk.dmo.DoggoModOverhauled;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 
-public class DogBowlScreen extends HandledScreen<ScreenHandler> {
+public class DogBowlScreen extends AbstractContainerScreen<AbstractContainerMenu> {
 	
-	private static final Identifier TEXTURE = new Identifier(DoggoModOverhauled.MODID, "textures/gui/dog_bowl.png");
+	private static final ResourceLocation TEXTURE = new ResourceLocation(DoggoModOverhauled.MODID, "textures/gui/dog_bowl.png");
 	
-	public DogBowlScreen(ScreenHandler handler, PlayerInventory inventory, Text title) {
+	public DogBowlScreen(AbstractContainerMenu handler, Inventory inventory, Component title) {
 		super(handler, inventory, title);
-		this.backgroundHeight = 130;
-		this.playerInventoryTitleY = this.backgroundHeight - 94;
+		this.imageHeight = 130;
+		this.inventoryLabelY = this.imageHeight - 94;
 	}
 
 	@Override
-	protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {
+	protected void renderBg(GuiGraphics context, float delta, int mouseX, int mouseY) {
 		//RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		//RenderSystem.setShaderTexture(0, TEXTURE);
-        int x = (this.width - this.backgroundWidth) / 2;
-        int y = (this.height - this.backgroundHeight) / 2;
-		context.drawTexture(TEXTURE, x, y, 0, 0, this.backgroundWidth, this.backgroundHeight);
+        int x = (this.width - this.imageWidth) / 2;
+        int y = (this.height - this.imageHeight) / 2;
+		context.blit(TEXTURE, x, y, 0, 0, this.imageWidth, this.imageHeight);
 	}
 	
 	@Override
-	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
         super.render(context, mouseX, mouseY, delta);
-        this.drawMouseoverTooltip(context, mouseX, mouseY);
+        this.renderTooltip(context, mouseX, mouseY);
 	}
 	
 	@Override
     protected void init() {
         super.init();
         // Center the title
-        this.titleX = (this.backgroundWidth - this.textRenderer.getWidth(title)) / 2;
+        this.titleLabelX = (this.imageWidth - this.font.width(title)) / 2;
     }
 }

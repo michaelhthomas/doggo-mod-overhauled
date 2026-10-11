@@ -3,9 +3,8 @@ package net.lordmrk.dmo.entity.ai.goal;
 import net.lordmrk.dmo.DoggoAction;
 import net.lordmrk.dmo.DoggoGoalData;
 import net.lordmrk.dmo.entity.DoggoEntity;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.ai.goal.Goal;
-
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.level.block.Blocks;
 import java.util.EnumSet;
 
 public class DoggoPlayInSnowGoal extends Goal {
@@ -19,11 +18,11 @@ public class DoggoPlayInSnowGoal extends Goal {
     public DoggoPlayInSnowGoal(DoggoEntity doggoEntity) {
         this.doggoEntity = doggoEntity;
         this.goalData = doggoEntity.getGoalData(ACTION);
-        this.setControls(EnumSet.of(Goal.Control.JUMP, Goal.Control.MOVE, Goal.Control.LOOK));
+        this.setFlags(EnumSet.of(Goal.Flag.JUMP, Goal.Flag.MOVE, Goal.Flag.LOOK));
     }
 
     @Override
-    public boolean canStart() {
+    public boolean canUse() {
         if (!this.goalData.canStart()) {
             return false;
         }
@@ -44,7 +43,7 @@ public class DoggoPlayInSnowGoal extends Goal {
     }
 
     @Override
-    public boolean canStop() {
+    public boolean isInterruptable() {
         if (this.actionTick <= 0) {
             return true;
         }
@@ -57,11 +56,11 @@ public class DoggoPlayInSnowGoal extends Goal {
     }
 
     private boolean isInSnow() {
-        if (this.doggoEntity.getWorld().getBlockState(this.doggoEntity.getBlockPos()).getBlock() == Blocks.SNOW) {
+        if (this.doggoEntity.level().getBlockState(this.doggoEntity.blockPosition()).getBlock() == Blocks.SNOW) {
             return true;
         }
 
-        if (this.doggoEntity.getWorld().getBlockState(this.doggoEntity.getBlockPos().down()).getBlock() == Blocks.SNOW_BLOCK) {
+        if (this.doggoEntity.level().getBlockState(this.doggoEntity.blockPosition().below()).getBlock() == Blocks.SNOW_BLOCK) {
             return true;
         }
 
@@ -69,8 +68,8 @@ public class DoggoPlayInSnowGoal extends Goal {
     }
 
     @Override
-    public boolean shouldContinue() {
-        return !canStop();
+    public boolean canContinueToUse() {
+        return !isInterruptable();
     }
 
     @Override

@@ -2,11 +2,10 @@ package net.lordmrk.dmo.entity.ai.goal;
 
 import net.lordmrk.dmo.*;
 import net.lordmrk.dmo.entity.DoggoEntity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.entity.projectile.thrown.ThrownItemEntity;
-import net.minecraft.util.Hand;
-
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
 import java.util.EnumSet;
 import java.util.List;
 
@@ -17,25 +16,25 @@ public class DoggoReadyPlayTimeGoal extends Goal {
 
     public DoggoReadyPlayTimeGoal(DoggoEntity doggoEntity) {
         this.doggoEntity = doggoEntity;
-        this.setControls(EnumSet.of(Goal.Control.JUMP, Goal.Control.MOVE));
+        this.setFlags(EnumSet.of(Goal.Flag.JUMP, Goal.Flag.MOVE));
     }
 
     @Override
-    public boolean shouldContinue() {
-        return !canStop();
+    public boolean canContinueToUse() {
+        return !isInterruptable();
     }
 
     @Override
-    public boolean canStart() {
-        if(!this.doggoEntity.isTamed()) {
+    public boolean canUse() {
+        if(!this.doggoEntity.isTame()) {
             return false;
         }
 
-        if(this.doggoEntity.isInsideWaterOrBubbleColumn()) {
+        if(this.doggoEntity.isInWaterOrBubble()) {
             return false;
         }
 
-        if(!this.doggoEntity.isOnGround()) {
+        if(!this.doggoEntity.onGround()) {
             return false;
         }
 
@@ -47,7 +46,7 @@ public class DoggoReadyPlayTimeGoal extends Goal {
             return false;
         }
 
-        if(this.doggoEntity.hasAngerTime()) {
+        if(this.doggoEntity.isAngry()) {
             return false;
         }
 
@@ -57,15 +56,15 @@ public class DoggoReadyPlayTimeGoal extends Goal {
             return false;
         }
 
-        if(livingEntity.getAttacker() != null) {
+        if(livingEntity.getLastHurtByMob() != null) {
             return false;
         }
 
-        if(livingEntity.getStackInHand(Hand.MAIN_HAND) == null) {
+        if(livingEntity.getItemInHand(InteractionHand.MAIN_HAND) == null) {
             return false;
         }
 
-        if(!livingEntity.getStackInHand(Hand.MAIN_HAND).isIn(DoggoItemTags.TENNIS_BALL)) {
+        if(!livingEntity.getItemInHand(InteractionHand.MAIN_HAND).is(DoggoItemTags.TENNIS_BALL)) {
             return false;
         }
 
@@ -77,16 +76,16 @@ public class DoggoReadyPlayTimeGoal extends Goal {
     }
 
     @Override
-    public boolean canStop() {
+    public boolean isInterruptable() {
         if(this.doggoEntity.hasBeenHurt()) {
             return true;
         }
 
-        if(this.doggoEntity.isInsideWaterOrBubbleColumn()) {
+        if(this.doggoEntity.isInWaterOrBubble()) {
             return true;
         }
 
-        if(!this.doggoEntity.isOnGround()) {
+        if(!this.doggoEntity.onGround()) {
             return true;
         }
 
@@ -96,15 +95,15 @@ public class DoggoReadyPlayTimeGoal extends Goal {
             return true;
         }
 
-        if(livingEntity.getAttacker() != null) {
+        if(livingEntity.getLastHurtByMob() != null) {
             return true;
         }
 
-        if(livingEntity.getStackInHand(Hand.MAIN_HAND) == null) {
+        if(livingEntity.getItemInHand(InteractionHand.MAIN_HAND) == null) {
             return true;
         }
 
-        if(!livingEntity.getStackInHand(Hand.MAIN_HAND).isIn(DoggoItemTags.TENNIS_BALL)) {
+        if(!livingEntity.getItemInHand(InteractionHand.MAIN_HAND).is(DoggoItemTags.TENNIS_BALL)) {
             return true;
         }
 
@@ -112,9 +111,9 @@ public class DoggoReadyPlayTimeGoal extends Goal {
             return true;
         }
 
-        List<ThrownItemEntity> list = this.doggoEntity.getWorld().getEntitiesByClass(
-                ThrownItemEntity.class,
-                this.doggoEntity.getBoundingBox().expand(8.0D, 8.0D, 8.0D),
+        List<ThrowableItemProjectile> list = this.doggoEntity.level().getEntitiesOfClass(
+                ThrowableItemProjectile.class,
+                this.doggoEntity.getBoundingBox().inflate(8.0D, 8.0D, 8.0D),
                 DoggoEntity.FOLLOWABLE_DROP_FILTER);
 
         return list.size() > 0;
@@ -151,6 +150,6 @@ public class DoggoReadyPlayTimeGoal extends Goal {
             return;
         }
 
-        this.doggoEntity.getLookControl().lookAt(livingEntity.getX(), livingEntity.getEyeY(), livingEntity.getZ());
+        this.doggoEntity.getLookControl().setLookAt(livingEntity.getX(), livingEntity.getEyeY(), livingEntity.getZ());
     }
 }

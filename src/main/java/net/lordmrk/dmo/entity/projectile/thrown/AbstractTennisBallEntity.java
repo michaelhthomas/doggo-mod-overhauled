@@ -2,54 +2,53 @@ package net.lordmrk.dmo.entity.projectile.thrown;
 
 import net.lordmrk.dmo.DoggoEntities;
 import net.lordmrk.dmo.DoggoModOverhauled;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.projectile.thrown.ThrownItemEntity;
-import net.minecraft.util.ItemScatterer;
-import net.minecraft.util.hit.EntityHitResult;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.Containers;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
 import java.util.HashSet;
 import java.util.Set;
 
-public abstract class AbstractTennisBallEntity extends ThrownItemEntity {
+public abstract class AbstractTennisBallEntity extends ThrowableItemProjectile {
 
     private static final Set<Block> BREAKABLE_BLOCKS = new HashSet<>();
 
-    public AbstractTennisBallEntity(EntityType<? extends AbstractTennisBallEntity> entityType, World world) {
+    public AbstractTennisBallEntity(EntityType<? extends AbstractTennisBallEntity> entityType, Level world) {
         super(entityType, world);
     }
 
-    public AbstractTennisBallEntity(EntityType<? extends AbstractTennisBallEntity> entityType, World world, LivingEntity owner) {
+    public AbstractTennisBallEntity(EntityType<? extends AbstractTennisBallEntity> entityType, Level world, LivingEntity owner) {
         super(entityType, owner, world);
     }
 
-    protected void onEntityHit(EntityHitResult entityHitResult) {
-        super.onEntityHit(entityHitResult);
+    protected void onHitEntity(EntityHitResult entityHitResult) {
+        super.onHitEntity(entityHitResult);
 
-        entityHitResult.getEntity().damage(this.getDamageSources().thrown(this, this.getOwner()), 0.0F);
+        entityHitResult.getEntity().hurt(this.damageSources().thrown(this, this.getOwner()), 0.0F);
     }
 
-    protected void onCollision(HitResult hitResult) {
-        super.onCollision(hitResult);
+    protected void onHit(HitResult hitResult) {
+        super.onHit(hitResult);
 
-        if(!this.getWorld().isClient) {
+        if(!this.level().isClientSide) {
 			if(hitResult.getType() == HitResult.Type.BLOCK) {
-                BlockPos pos = new BlockPos((int) hitResult.getPos().getX(), (int) hitResult.getPos().getY(), (int) hitResult.getPos().getZ());
-				BlockState state = this.getWorld().getBlockState(pos);
+                BlockPos pos = new BlockPos((int) hitResult.getLocation().x(), (int) hitResult.getLocation().y(), (int) hitResult.getLocation().z());
+				BlockState state = this.level().getBlockState(pos);
 
 				if(BREAKABLE_BLOCKS.contains(state.getBlock())) {
-					this.getWorld().breakBlock(pos, false);
+					this.level().destroyBlock(pos, false);
 				}
 			}
 
-            ItemScatterer.spawn(this.getWorld(), this.getX(), this.getY(), this.getZ(), this.getDefaultItem().getDefaultStack());
+            Containers.dropItemStack(this.level(), this.getX(), this.getY(), this.getZ(), this.getDefaultItem().getDefaultInstance());
 
             this.remove(Entity.RemovalReason.KILLED);
         }

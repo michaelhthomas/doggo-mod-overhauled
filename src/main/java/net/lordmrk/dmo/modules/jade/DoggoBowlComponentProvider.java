@@ -2,11 +2,11 @@ package net.lordmrk.dmo.modules.jade;
 
 import net.lordmrk.dmo.DoggoModOverhauled;
 import net.lordmrk.dmo.block.entity.DogBowlEntity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
+import net.minecraft.ChatFormatting;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.resources.ResourceLocation;
 import snownee.jade.api.BlockAccessor;
 import snownee.jade.api.IBlockComponentProvider;
 import snownee.jade.api.IServerDataProvider;
@@ -20,7 +20,7 @@ public enum DoggoBowlComponentProvider implements IBlockComponentProvider, IServ
     private static final String KEY_CUSTOM_NAME = "CustomName";
 
     @Override
-    public void appendServerData(NbtCompound nbt, BlockAccessor accessor) {
+    public void appendServerData(CompoundTag nbt, BlockAccessor accessor) {
         DogBowlEntity dogBowl = (DogBowlEntity) accessor.getBlockEntity();
 
         if (dogBowl.getCustomName() != null) {
@@ -30,18 +30,18 @@ public enum DoggoBowlComponentProvider implements IBlockComponentProvider, IServ
 
     @Override
     public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig iPluginConfig) {
-        NbtCompound nbt = accessor.getServerData();
+        CompoundTag nbt = accessor.getServerData();
 
         tooltip.clear();
         if (nbt.contains(KEY_CUSTOM_NAME)) {
-            tooltip.append(Text.translatable("jade.doggomodoverhauled.dog_bowl.custom_name", nbt.getString(KEY_CUSTOM_NAME)).fillStyle(Style.EMPTY.withColor(Formatting.WHITE)));
+            tooltip.append(Component.translatable("jade.doggomodoverhauled.dog_bowl.custom_name", nbt.getString(KEY_CUSTOM_NAME)).withStyle(Style.EMPTY.withColor(ChatFormatting.WHITE)));
         } else {
-            tooltip.append(Text.translatable(accessor.getBlockState().getBlock().getTranslationKey()).fillStyle(Style.EMPTY.withColor(Formatting.WHITE)));
+            tooltip.append(Component.translatable(accessor.getBlockState().getBlock().getDescriptionId()).withStyle(Style.EMPTY.withColor(ChatFormatting.WHITE)));
         }
     }
 
     @Override
-    public Identifier getUid() {
+    public ResourceLocation getUid() {
         return DoggoModOverhauled.JADE_DOG_BOWL;
     }
 }

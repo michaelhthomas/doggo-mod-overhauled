@@ -4,16 +4,20 @@ import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.lordmrk.dmo.DoggoEntities;
 import net.lordmrk.dmo.entity.projectile.thrown.AbstractTennisBallEntity;
 import net.lordmrk.dmo.entity.projectile.thrown.RedTennisBallEntity;
-import net.minecraft.client.item.TooltipContext;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.stat.Stats;
-import net.minecraft.text.Text;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.stats.Stats;
 import net.minecraft.util.*;
-import net.minecraft.world.World;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -24,16 +28,16 @@ public class TennisBall extends Item {
     private final boolean legacy;
 
     public TennisBall(DyeColor color, boolean legacy) {
-        super(new FabricItemSettings().maxCount(16));
+        super(new FabricItemSettings().stacksTo(16));
 
         this.color = color;
         this.legacy = legacy;
     }
 
-    public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
+    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag context) {
         if(this.legacy) {
-            tooltip.add(Text.literal("This version of tennis ball is deprecated and will be removed in the future.").formatted(Formatting.RED));
-            tooltip.add(Text.literal("Use a crafting table to convert it into up-to-date tennis ball.").formatted(Formatting.RED));
+            tooltip.add(Component.literal("This version of tennis ball is deprecated and will be removed in the future.").withStyle(ChatFormatting.RED));
+            tooltip.add(Component.literal("Use a crafting table to convert it into up-to-date tennis ball.").withStyle(ChatFormatting.RED));
         }
     }
 
@@ -41,26 +45,26 @@ public class TennisBall extends Item {
         return color;
     }
 
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-        ItemStack itemStack = user.getStackInHand(hand);
+    public InteractionResultHolder<ItemStack> use(Level world, Player user, InteractionHand hand) {
+        ItemStack itemStack = user.getItemInHand(hand);
 
         if(this.legacy) {
-            return TypedActionResult.fail(itemStack);
+            return InteractionResultHolder.fail(itemStack);
         }
 
-        world.playSound(null, user.getX(), user.getY(), user.getZ(), SoundEvents.ENTITY_SNOWBALL_THROW, SoundCategory.PLAYERS, 0.5F, 0.4F / (world.getRandom().nextFloat() * 0.4F + 0.8F));
-        if (!world.isClient) {
+        world.playSound(null, user.getX(), user.getY(), user.getZ(), SoundEvents.SNOWBALL_THROW, SoundSource.PLAYERS, 0.5F, 0.4F / (world.getRandom().nextFloat() * 0.4F + 0.8F));
+        if (!world.isClientSide) {
             AbstractTennisBallEntity tennisBallEntity = DoggoEntities.newTennisBall(world, user, this.getColor());
             tennisBallEntity.setItem(itemStack);
-            tennisBallEntity.setVelocity(user, user.getPitch(), user.getYaw(), 0.0F, 1.5F, 1.0F);
-            world.spawnEntity(tennisBallEntity);
+            tennisBallEntity.shootFromRotation(user, user.getXRot(), user.getYRot(), 0.0F, 1.5F, 1.0F);
+            world.addFreshEntity(tennisBallEntity);
         }
 
-        user.incrementStat(Stats.USED.getOrCreateStat(this));
-        if (!user.getAbilities().creativeMode) {
-            itemStack.decrement(1);
+        user.awardStat(Stats.ITEM_USED.get(this));
+        if (!user.getAbilities().instabuild) {
+            itemStack.shrink(1);
         }
 
-        return TypedActionResult.success(itemStack, world.isClient());
+        return InteractionResultHolder.sidedSuccess(itemStack, world.isClientSide());
     }
 }

@@ -1,21 +1,21 @@
 package net.lordmrk.dmo;
 
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.text.Text;
-import net.minecraft.util.DyeColor;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.ItemStack;
 
 public class DoggoItemGroups {
 
-    public static final RegistryKey<ItemGroup> DOG_STUFF_REGISTRY_KEY = RegistryKey.of(RegistryKeys.ITEM_GROUP, new Identifier(DoggoModOverhauled.MODID, "doggomodoverhauled"));
-    public static final ItemGroup DOG_STUFF_GROUP = FabricItemGroup.builder()
-            .displayName(Text.translatable("itemGroup." + DoggoModOverhauled.MODID + ".doggomodoverhauled"))
+    public static final ResourceKey<CreativeModeTab> DOG_STUFF_REGISTRY_KEY = ResourceKey.create(Registries.CREATIVE_MODE_TAB, new ResourceLocation(DoggoModOverhauled.MODID, "doggomodoverhauled"));
+    public static final CreativeModeTab DOG_STUFF_GROUP = FabricItemGroup.builder()
+            .title(Component.translatable("itemGroup." + DoggoModOverhauled.MODID + ".doggomodoverhauled"))
             .icon(() -> new ItemStack(DoggoBlocks.getDogBowl(DyeColor.CYAN)))
             .build();
 
@@ -23,7 +23,7 @@ public class DoggoItemGroups {
         registerItemGroup("doggomodoverhauled", DOG_STUFF_GROUP);
     }
 
-    private static void registerItemGroup(String id, ItemGroup itemGroup) {
-        Registry.register(Registries.ITEM_GROUP, new Identifier(DoggoModOverhauled.MODID, id), itemGroup);
+    private static void registerItemGroup(String id, CreativeModeTab itemGroup) {
+        Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, new ResourceLocation(DoggoModOverhauled.MODID, id), itemGroup);
     }
 }

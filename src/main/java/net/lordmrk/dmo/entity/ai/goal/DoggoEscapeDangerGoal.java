@@ -1,15 +1,15 @@
 package net.lordmrk.dmo.entity.ai.goal;
 
 import net.lordmrk.dmo.entity.DoggoEntity;
-import net.minecraft.entity.ai.goal.EscapeDangerGoal;
+import net.minecraft.world.entity.ai.goal.PanicGoal;
 
-public class DoggoEscapeDangerGoal extends EscapeDangerGoal {
+public class DoggoEscapeDangerGoal extends PanicGoal {
 
     public DoggoEscapeDangerGoal(DoggoEntity doggoEntity, double speed) {
         super(doggoEntity, speed);
     }
 
-    protected boolean isInDanger() {
-        return this.mob.shouldEscapePowderSnow() || this.mob.isOnFire();
+    protected boolean shouldPanic() {
+        return this.mob.isFreezing() || this.mob.isOnFire();
     }
 }

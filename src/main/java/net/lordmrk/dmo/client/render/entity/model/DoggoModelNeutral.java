@@ -1,8 +1,8 @@
 package net.lordmrk.dmo.client.render.entity.model;
 
 import net.lordmrk.dmo.entity.DoggoEntity;
-import net.minecraft.client.model.ModelPart;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.util.Mth;
 
 public class DoggoModelNeutral extends DoggoEntityModel<DoggoEntity> {
 	
@@ -11,7 +11,7 @@ public class DoggoModelNeutral extends DoggoEntityModel<DoggoEntity> {
 	}
 
 	@Override
-	public void animateModel(DoggoEntity doggoEntity, float f, float g, float h) {
+	public void prepareMobModel(DoggoEntity doggoEntity, float f, float g, float h) {
 		if(doggoEntity.isInLieDownPose()) {
 			lieDown();
 		} else if(doggoEntity.isInSittingPose()) {
@@ -24,80 +24,80 @@ public class DoggoModelNeutral extends DoggoEntityModel<DoggoEntity> {
 	}
 
 	private void lieDown() {
-		this.head.setPivot(-1.0F, 18.0F, -7.0F);
-		this.head.roll = 0f;
-		this.torso.setPivot(0.0F, 20.0F, 2.0F);
-		this.torso.pitch = DEGREES_90;
-		this.neck.setPivot(-1.0F, 20.5F, -3.0F);
-		this.neck.yaw = 0f;
-		this.neck.pitch = this.torso.pitch;
-		this.tail.setPivot(-1.0F, 18.0F, 8.0F);
+		this.head.setPos(-1.0F, 18.0F, -7.0F);
+		this.head.zRot = 0f;
+		this.torso.setPos(0.0F, 20.0F, 2.0F);
+		this.torso.xRot = DEGREES_90;
+		this.neck.setPos(-1.0F, 20.5F, -3.0F);
+		this.neck.yRot = 0f;
+		this.neck.xRot = this.torso.xRot;
+		this.tail.setPos(-1.0F, 18.0F, 8.0F);
 
-		this.leftFrontLeg.setPivot(0.5F, 23.0F, -4.0F);
-		this.leftFrontLeg.yaw = -DEGREES_15;
-		this.leftFrontLeg.pitch = -DEGREES_90;
-		this.rightFrontLeg.setPivot(-2.5F, 23.0F, -4.0F);
-		this.rightFrontLeg.yaw = DEGREES_15;
-		this.rightFrontLeg.pitch = -DEGREES_90;
+		this.leftFrontLeg.setPos(0.5F, 23.0F, -4.0F);
+		this.leftFrontLeg.yRot = -DEGREES_15;
+		this.leftFrontLeg.xRot = -DEGREES_90;
+		this.rightFrontLeg.setPos(-2.5F, 23.0F, -4.0F);
+		this.rightFrontLeg.yRot = DEGREES_15;
+		this.rightFrontLeg.xRot = -DEGREES_90;
 
-		this.leftHindLeg.setPivot(0.5F, 23.0F, 7.0F);
-		this.leftHindLeg.yaw = -DEGREES_25;
-		this.leftHindLeg.pitch = -DEGREES_90;
-		this.rightHindLeg.setPivot(-2.5F, 23.0F, 7.0F);
-		this.rightHindLeg.yaw = DEGREES_25;
-		this.rightHindLeg.pitch = -DEGREES_90;
+		this.leftHindLeg.setPos(0.5F, 23.0F, 7.0F);
+		this.leftHindLeg.yRot = -DEGREES_25;
+		this.leftHindLeg.xRot = -DEGREES_90;
+		this.rightHindLeg.setPos(-2.5F, 23.0F, 7.0F);
+		this.rightHindLeg.yRot = DEGREES_25;
+		this.rightHindLeg.xRot = -DEGREES_90;
 	}
 	
 	private void shakingAndBegging(DoggoEntity doggoEntity, float h) {
-		this.realHead.roll = doggoEntity.getBegAnimationProgress(h) + doggoEntity.getShakeAnimationProgress(h, 0.0F);
-		this.neck.roll = doggoEntity.getShakeAnimationProgress(h, -0.08F);
-		this.torso.roll = doggoEntity.getShakeAnimationProgress(h, -0.16F);
-		this.realTail.roll = doggoEntity.getShakeAnimationProgress(h, -0.2F);
+		this.realHead.zRot = doggoEntity.getBegAnimationProgress(h) + doggoEntity.getShakeAnimationProgress(h, 0.0F);
+		this.neck.zRot = doggoEntity.getShakeAnimationProgress(h, -0.08F);
+		this.torso.zRot = doggoEntity.getShakeAnimationProgress(h, -0.16F);
+		this.realTail.zRot = doggoEntity.getShakeAnimationProgress(h, -0.2F);
 	}
 
 	private void sitting() {
-		this.head.setPivot(-1.0F, 14.0F, -7.3F);
-		this.head.roll = 0f;
-		this.neck.setPivot(-1.0F, 16.0F, -3.0F);
-		this.neck.pitch = DEGREES_72;
-		this.neck.yaw = 0.0F;
-		this.torso.setPivot(0.0F, 18.0F, 0.0F);
-		this.torso.pitch = DEGREES_45;
-		this.tail.setPivot(-1.0F, 21.0F, 6.0F);
-		this.rightHindLeg.setPivot(-2.5F, 22.7F, 2.0F);
-		this.rightHindLeg.yaw = 0f;
-		this.rightHindLeg.pitch = DEGREES_270;
-		this.leftHindLeg.setPivot(0.5F, 22.7F, 2.0F);
-		this.leftHindLeg.yaw = 0f;
-		this.leftHindLeg.pitch = DEGREES_270;
-		this.rightFrontLeg.setPivot(-2.49F, 17.0F, -4.0F);
-		this.rightFrontLeg.yaw = 0f;
-		this.rightFrontLeg.pitch = DEGREES_333;
-		this.leftFrontLeg.setPivot(0.51F, 17.0F, -4.0F);
-		this.leftFrontLeg.yaw = 0f;
-		this.leftFrontLeg.pitch = DEGREES_333;
+		this.head.setPos(-1.0F, 14.0F, -7.3F);
+		this.head.zRot = 0f;
+		this.neck.setPos(-1.0F, 16.0F, -3.0F);
+		this.neck.xRot = DEGREES_72;
+		this.neck.yRot = 0.0F;
+		this.torso.setPos(0.0F, 18.0F, 0.0F);
+		this.torso.xRot = DEGREES_45;
+		this.tail.setPos(-1.0F, 21.0F, 6.0F);
+		this.rightHindLeg.setPos(-2.5F, 22.7F, 2.0F);
+		this.rightHindLeg.yRot = 0f;
+		this.rightHindLeg.xRot = DEGREES_270;
+		this.leftHindLeg.setPos(0.5F, 22.7F, 2.0F);
+		this.leftHindLeg.yRot = 0f;
+		this.leftHindLeg.xRot = DEGREES_270;
+		this.rightFrontLeg.setPos(-2.49F, 17.0F, -4.0F);
+		this.rightFrontLeg.yRot = 0f;
+		this.rightFrontLeg.xRot = DEGREES_333;
+		this.leftFrontLeg.setPos(0.51F, 17.0F, -4.0F);
+		this.leftFrontLeg.yRot = 0f;
+		this.leftFrontLeg.xRot = DEGREES_333;
 	}
 	
 	private void standing(float f, float g) {
-		this.head.setPivot(-1.0F, 13.5F, -7.0F);
-		this.torso.pitch = DEGREES_90;
-		this.neck.setPivot(-1.0F, 14.0F, -3.0F);
-		this.neck.pitch = this.torso.pitch;
-		this.rightFrontLeg.setPivot(-2.5F, 16.0F, -4.0F);
-		this.leftFrontLeg.setPivot(0.5F, 16.0F, -4.0F);
-		this.rightHindLeg.pitch = MathHelper.cos(f * 0.6662F) * 1.4F * g;
-		this.leftHindLeg.pitch = MathHelper.cos(f * 0.6662F + DEGREES_180) * 1.4F * g;
-		this.rightFrontLeg.pitch = MathHelper.cos(f * 0.6662F + DEGREES_180) * 1.4F * g;
-		this.leftFrontLeg.pitch = MathHelper.cos(f * 0.6662F) * 1.4F * g;
-		this.neck.yaw = 0f;
-		this.head.roll = 0f;
-		this.torso.setPivot(0.0F, 14.0F, 2.0F);
-		this.tail.setPivot(-1.0F, 12.0F, 8.0F);
-		this.rightHindLeg.setPivot(-2.5F, 16.0F, 7.0F);
-		this.leftHindLeg.setPivot(0.5F, 16.0F, 7.0F);
-		this.rightHindLeg.yaw = 0f;
-		this.leftHindLeg.yaw = 0f;
-		this.rightFrontLeg.yaw = 0f;
-		this.leftFrontLeg.yaw = 0f;
+		this.head.setPos(-1.0F, 13.5F, -7.0F);
+		this.torso.xRot = DEGREES_90;
+		this.neck.setPos(-1.0F, 14.0F, -3.0F);
+		this.neck.xRot = this.torso.xRot;
+		this.rightFrontLeg.setPos(-2.5F, 16.0F, -4.0F);
+		this.leftFrontLeg.setPos(0.5F, 16.0F, -4.0F);
+		this.rightHindLeg.xRot = Mth.cos(f * 0.6662F) * 1.4F * g;
+		this.leftHindLeg.xRot = Mth.cos(f * 0.6662F + DEGREES_180) * 1.4F * g;
+		this.rightFrontLeg.xRot = Mth.cos(f * 0.6662F + DEGREES_180) * 1.4F * g;
+		this.leftFrontLeg.xRot = Mth.cos(f * 0.6662F) * 1.4F * g;
+		this.neck.yRot = 0f;
+		this.head.zRot = 0f;
+		this.torso.setPos(0.0F, 14.0F, 2.0F);
+		this.tail.setPos(-1.0F, 12.0F, 8.0F);
+		this.rightHindLeg.setPos(-2.5F, 16.0F, 7.0F);
+		this.leftHindLeg.setPos(0.5F, 16.0F, 7.0F);
+		this.rightHindLeg.yRot = 0f;
+		this.leftHindLeg.yRot = 0f;
+		this.rightFrontLeg.yRot = 0f;
+		this.leftFrontLeg.yRot = 0f;
 	}
 }

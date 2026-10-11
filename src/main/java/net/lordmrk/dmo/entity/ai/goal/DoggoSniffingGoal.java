@@ -4,13 +4,11 @@ import net.lordmrk.dmo.DoggoAction;
 import net.lordmrk.dmo.DoggoFeeling;
 import net.lordmrk.dmo.DoggoGoalData;
 import net.lordmrk.dmo.entity.DoggoEntity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.util.ItemScatterer;
-import net.minecraft.util.math.MathHelper;
-
+import net.minecraft.util.Mth;
+import net.minecraft.world.Containers;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import java.util.EnumSet;
 
 public class DoggoSniffingGoal extends Goal {
@@ -31,16 +29,16 @@ public class DoggoSniffingGoal extends Goal {
     public DoggoSniffingGoal(DoggoEntity doggoEntity) {
         this.doggoEntity = doggoEntity;
         this.goalData = doggoEntity.getGoalData(ACTION);
-        this.setControls(EnumSet.of(Goal.Control.JUMP, Control.MOVE, Goal.Control.LOOK));
+        this.setFlags(EnumSet.of(Goal.Flag.JUMP, Flag.MOVE, Goal.Flag.LOOK));
     }
 
     @Override
-    public boolean shouldContinue() {
-        return !canStop();
+    public boolean canContinueToUse() {
+        return !isInterruptable();
     }
 
     @Override
-    public boolean canStart() {
+    public boolean canUse() {
         if(!this.goalData.canStart()) {
             return false;
         }
@@ -57,7 +55,7 @@ public class DoggoSniffingGoal extends Goal {
     }
 
     @Override
-    public boolean canStop() {
+    public boolean isInterruptable() {
         if(this.canStop) {
             return true;
         }
@@ -99,24 +97,24 @@ public class DoggoSniffingGoal extends Goal {
 
     @Override
     public void tick() {
-        if(this.doggoEntity.getNavigation().isIdle()) {
+        if(this.doggoEntity.getNavigation().isDone()) {
             if(this.canDig) {
                 this.doggoEntity.setAction(DoggoAction.DIGGING);
 
                 if(this.minDigTime == 0 && this.doggoEntity.getRandom().nextFloat() < 0.1f) {
                     if(this.doggoEntity.getRandom().nextInt(4) == 0) {
-                        double x = MathHelper.sin(-this.doggoEntity.headYaw % 360 / 58) * 0.5f;
-                        double z = MathHelper.cos(this.doggoEntity.headYaw % 360 / 58) * 0.5f;
+                        double x = Mth.sin(-this.doggoEntity.yHeadRot % 360 / 58) * 0.5f;
+                        double z = Mth.cos(this.doggoEntity.yHeadRot % 360 / 58) * 0.5f;
 
                         ItemStack item;
 
                         if (this.doggoEntity.getRandom().nextInt(2) == 0) {
-                            item = Items.IRON_NUGGET.getDefaultStack();
+                            item = Items.IRON_NUGGET.getDefaultInstance();
                         } else {
-                            item = Items.GOLD_NUGGET.getDefaultStack();
+                            item = Items.GOLD_NUGGET.getDefaultInstance();
                         }
 
-                        ItemScatterer.spawn(this.doggoEntity.getWorld(), this.doggoEntity.getX() + x, this.doggoEntity.getY(), this.doggoEntity.getZ() + z, item);
+                        Containers.dropItemStack(this.doggoEntity.level(), this.doggoEntity.getX() + x, this.doggoEntity.getY(), this.doggoEntity.getZ() + z, item);
                     }
 
                     this.canStop = true;
@@ -145,11 +143,11 @@ public class DoggoSniffingGoal extends Goal {
             }
 
             if(this.navigateBack) {
-                this.doggoEntity.getNavigation().startMovingTo(startX, startY, startZ, 0.8);
+                this.doggoEntity.getNavigation().moveTo(startX, startY, startZ, 0.8);
             } else {
                 float x = this.doggoEntity.getRandom().nextFloat() * 5 - this.doggoEntity.getRandom().nextFloat() * 5;
                 float z = this.doggoEntity.getRandom().nextFloat() * 5 - this.doggoEntity.getRandom().nextFloat() * 5;
-                this.doggoEntity.getNavigation().startMovingTo(startX + x, startY, startZ + z, 0.8);
+                this.doggoEntity.getNavigation().moveTo(startX + x, startY, startZ + z, 0.8);
             }
 
             this.navigateBack = !this.navigateBack;

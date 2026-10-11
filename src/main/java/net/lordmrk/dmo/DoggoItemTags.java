@@ -1,9 +1,9 @@
 package net.lordmrk.dmo;
 
-import net.minecraft.item.Item;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
 
 public class DoggoItemTags {
 
@@ -12,6 +12,6 @@ public class DoggoItemTags {
     public static final TagKey<Item> TENNIS_BALL = of("tennis_ball");
 
     private static TagKey<Item> of(String id) {
-        return TagKey.of(RegistryKeys.ITEM, new Identifier(DoggoModOverhauled.MODID, id));
+        return TagKey.create(Registries.ITEM, new ResourceLocation(DoggoModOverhauled.MODID, id));
     }
 }

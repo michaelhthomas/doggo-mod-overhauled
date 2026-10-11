@@ -5,12 +5,12 @@ import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityT
 import net.fabricmc.fabric.api.screenhandler.v1.ScreenHandlerRegistry;
 import net.lordmrk.dmo.block.entity.DogBowlEntity;
 import net.lordmrk.dmo.screen.DogBowlScreenHandler;
-import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.entity.data.TrackedDataHandlerRegistry;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.screen.ScreenHandlerType;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,10 +19,10 @@ public class DoggoModOverhauled implements ModInitializer {
 	public static final String MODID = "doggomodoverhauled";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MODID);
 
-	public static final Identifier JADE_DOG_BOWL = new Identifier(MODID, "dog_bowl");
-	public static final Identifier DOG_BOWL = new Identifier(MODID, "dog_bowl_entity");
+	public static final ResourceLocation JADE_DOG_BOWL = new ResourceLocation(MODID, "dog_bowl");
+	public static final ResourceLocation DOG_BOWL = new ResourceLocation(MODID, "dog_bowl_entity");
 	public static BlockEntityType<DogBowlEntity> DOG_BOWL_ENTITY;
-	public static final ScreenHandlerType<DogBowlScreenHandler> DOG_BOWL_SCREEN_HANDLER;
+	public static final MenuType<DogBowlScreenHandler> DOG_BOWL_SCREEN_HANDLER;
 
 
 	@Override
@@ -40,14 +40,14 @@ public class DoggoModOverhauled implements ModInitializer {
 		DoggoItems.addToDoggoModItemGroup();
 
 		DOG_BOWL_ENTITY = Registry.register(
-				Registries.BLOCK_ENTITY_TYPE,
+				BuiltInRegistries.BLOCK_ENTITY_TYPE,
 				DOG_BOWL,
 				FabricBlockEntityTypeBuilder.create(
 						DogBowlEntity::new,
 						DoggoBlocks.getDogBowls()).build(null));
 
-		TrackedDataHandlerRegistry.register(TrackedDoggoData.DOGGO_ACTION);
-		TrackedDataHandlerRegistry.register(TrackedDoggoData.DOGGO_FEELING);
+		EntityDataSerializers.registerSerializer(TrackedDoggoData.DOGGO_ACTION);
+		EntityDataSerializers.registerSerializer(TrackedDoggoData.DOGGO_FEELING);
 	}
 
 	static {

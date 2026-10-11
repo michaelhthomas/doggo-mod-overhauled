@@ -3,9 +3,7 @@ package net.lordmrk.dmo.entity.ai.goal;
 import net.lordmrk.dmo.DoggoAction;
 import net.lordmrk.dmo.DoggoGoalData;
 import net.lordmrk.dmo.entity.DoggoEntity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.goal.Goal;
-
+import net.minecraft.world.entity.ai.goal.Goal;
 import java.util.EnumSet;
 
 public class DoggoListeningGoal extends Goal {
@@ -19,16 +17,16 @@ public class DoggoListeningGoal extends Goal {
     public DoggoListeningGoal(DoggoEntity doggoEntity) {
         this.doggoEntity = doggoEntity;
         this.goalData = doggoEntity.getGoalData(ACTION);
-        this.setControls(EnumSet.of(Goal.Control.JUMP, Goal.Control.MOVE, Goal.Control.LOOK));
+        this.setFlags(EnumSet.of(Goal.Flag.JUMP, Goal.Flag.MOVE, Goal.Flag.LOOK));
     }
 
     @Override
-    public boolean shouldContinue() {
-        return !canStop();
+    public boolean canContinueToUse() {
+        return !isInterruptable();
     }
 
     @Override
-    public boolean canStart() {
+    public boolean canUse() {
         if (!this.goalData.canStart()) {
             return false;
         }
@@ -45,7 +43,7 @@ public class DoggoListeningGoal extends Goal {
     }
 
     @Override
-    public boolean canStop() {
+    public boolean isInterruptable() {
         if(this.actionTick <= 0) {
             return true;
         }
@@ -80,9 +78,9 @@ public class DoggoListeningGoal extends Goal {
 
     @Override
     public void tick() {
-        if(this.doggoEntity.isSitting() && !this.doggoEntity.isInSittingPose()) {
+        if(this.doggoEntity.isOrderedToSit() && !this.doggoEntity.isInSittingPose()) {
             this.doggoEntity.setInSittingPose(true);
-        } else if(!this.doggoEntity.isSitting() && this.doggoEntity.isInSittingPose()) {
+        } else if(!this.doggoEntity.isOrderedToSit() && this.doggoEntity.isInSittingPose()) {
             this.doggoEntity.setInSittingPose(false);
         }
 

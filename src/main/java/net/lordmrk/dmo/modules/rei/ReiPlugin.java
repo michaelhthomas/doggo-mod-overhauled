@@ -9,11 +9,10 @@ import me.shedaniel.rei.plugin.common.displays.DefaultInformationDisplay;
 import net.lordmrk.dmo.DoggoBlocks;
 import net.lordmrk.dmo.DoggoItems;
 import net.lordmrk.dmo.DoggoModOverhauled;
-import net.minecraft.block.Block;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
-
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
 import java.util.AbstractMap;
 
 public class ReiPlugin implements REIClientPlugin {
@@ -25,41 +24,41 @@ public class ReiPlugin implements REIClientPlugin {
 
     private void registerDescriptions(DisplayRegistry registry) {
         addDescriptionToDogBeds(registry,
-                Text.translatable("rei.doggomodoverhauled.dog_bed.description.1"));
+                Component.translatable("rei.doggomodoverhauled.dog_bed.description.1"));
         addDescriptionToDogBowls(registry,
-                Text.translatable("rei.doggomodoverhauled.dog_bowl.description.1"),
-                Text.translatable("rei.doggomodoverhauled.dog_bowl.description.2"),
-                Text.translatable("rei.doggomodoverhauled.dog_bowl.description.3"));
+                Component.translatable("rei.doggomodoverhauled.dog_bowl.description.1"),
+                Component.translatable("rei.doggomodoverhauled.dog_bowl.description.2"),
+                Component.translatable("rei.doggomodoverhauled.dog_bowl.description.3"));
         addDescriptionToDogToys(registry,
-                Text.translatable("rei.doggomodoverhauled.tennis_ball.description.1"),
-                Text.translatable("rei.doggomodoverhauled.tennis_ball.description.2"));
+                Component.translatable("rei.doggomodoverhauled.tennis_ball.description.1"),
+                Component.translatable("rei.doggomodoverhauled.tennis_ball.description.2"));
     }
 
-    private void addDescriptionToDogBeds(DisplayRegistry registry, Text... lines) {
+    private void addDescriptionToDogBeds(DisplayRegistry registry, Component... lines) {
         for(AbstractMap.SimpleEntry<String, Block> entry : DoggoBlocks.BED_LIST) {
             addDescription(registry, entry.getValue(), lines);
         }
     }
 
-    private void addDescriptionToDogBowls(DisplayRegistry registry, Text... lines) {
+    private void addDescriptionToDogBowls(DisplayRegistry registry, Component... lines) {
         for(AbstractMap.SimpleEntry<String, Block> entry : DoggoBlocks.BOWL_LIST) {
             addDescription(registry, entry.getValue(), lines);
         }
     }
 
-    private void addDescriptionToDogToys(DisplayRegistry registry, Text... lines) {
+    private void addDescriptionToDogToys(DisplayRegistry registry, Component... lines) {
         for(AbstractMap.SimpleEntry<String, Item> entry : DoggoItems.TOY_LIST) {
             addDescription(registry, entry.getValue(), lines);
         }
     }
 
-    private void addDescription(DisplayRegistry registry, Block block, Text... lines) {
+    private void addDescription(DisplayRegistry registry, Block block, Component... lines) {
         addDescription(registry, block.asItem(), lines);
     }
 
-    private void addDescription(DisplayRegistry registry, Item item, Text... lines) {
-        ItemStack itemStack = item.getDefaultStack();
-        DefaultInformationDisplay info = DefaultInformationDisplay.createFromEntry(EntryStacks.of(itemStack), itemStack.getName());
+    private void addDescription(DisplayRegistry registry, Item item, Component... lines) {
+        ItemStack itemStack = item.getDefaultInstance();
+        DefaultInformationDisplay info = DefaultInformationDisplay.createFromEntry(EntryStacks.of(itemStack), itemStack.getHoverName());
 
         info.lines(lines);
         registry.add(info);

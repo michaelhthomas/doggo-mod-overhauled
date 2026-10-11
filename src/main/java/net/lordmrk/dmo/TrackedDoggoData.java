@@ -1,18 +1,18 @@
 package net.lordmrk.dmo;
 
-import net.minecraft.entity.data.TrackedDataHandler;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.syncher.EntityDataSerializer;
 
 public class TrackedDoggoData {
 	
-	public static final TrackedDataHandler<DoggoFeeling> DOGGO_FEELING = new TrackedDataHandler<>() {
+	public static final EntityDataSerializer<DoggoFeeling> DOGGO_FEELING = new EntityDataSerializer<>() {
 		
-		public void write(PacketByteBuf packetByteBuf, DoggoFeeling doggoFeeling) {
-			packetByteBuf.writeEnumConstant(doggoFeeling);
+		public void write(FriendlyByteBuf packetByteBuf, DoggoFeeling doggoFeeling) {
+			packetByteBuf.writeEnum(doggoFeeling);
 		}
 
-		public DoggoFeeling read(PacketByteBuf packetByteBuf) {
-			return packetByteBuf.readEnumConstant(DoggoFeeling.class);
+		public DoggoFeeling read(FriendlyByteBuf packetByteBuf) {
+			return packetByteBuf.readEnum(DoggoFeeling.class);
 		}
 
 		public DoggoFeeling copy(DoggoFeeling doggoFeeling) {
@@ -20,14 +20,14 @@ public class TrackedDoggoData {
 		}
 	};
 	
-	public static final TrackedDataHandler<DoggoAction> DOGGO_ACTION = new TrackedDataHandler<>() {
+	public static final EntityDataSerializer<DoggoAction> DOGGO_ACTION = new EntityDataSerializer<>() {
 		
-		public void write(PacketByteBuf packetByteBuf, DoggoAction doggoAction) {
-			packetByteBuf.writeEnumConstant(doggoAction);
+		public void write(FriendlyByteBuf packetByteBuf, DoggoAction doggoAction) {
+			packetByteBuf.writeEnum(doggoAction);
 		}
 
-		public DoggoAction read(PacketByteBuf packetByteBuf) {
-			return packetByteBuf.readEnumConstant(DoggoAction.class);
+		public DoggoAction read(FriendlyByteBuf packetByteBuf) {
+			return packetByteBuf.readEnum(DoggoAction.class);
 		}
 
 		public DoggoAction copy(DoggoAction doggoAction) {

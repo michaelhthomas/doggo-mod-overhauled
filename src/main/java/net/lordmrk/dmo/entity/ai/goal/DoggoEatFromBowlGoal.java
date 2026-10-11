@@ -9,11 +9,11 @@ import net.lordmrk.dmo.DoggoFeeling;
 import net.lordmrk.dmo.block.DogBowl;
 import net.lordmrk.dmo.block.entity.DogBowlEntity;
 import net.lordmrk.dmo.entity.DoggoEntity;
-import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.core.BlockPos;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.phys.Vec3;
 
 public class DoggoEatFromBowlGoal extends Goal {
 
@@ -26,25 +26,25 @@ public class DoggoEatFromBowlGoal extends Goal {
 
 	public DoggoEatFromBowlGoal(DoggoEntity doggoEntity) {
 		this.doggoEntity = doggoEntity;
-		this.setControls(EnumSet.of(Goal.Control.JUMP, Goal.Control.MOVE, Goal.Control.LOOK));
+		this.setFlags(EnumSet.of(Goal.Flag.JUMP, Goal.Flag.MOVE, Goal.Flag.LOOK));
 	}
 
 	@Override
-	public boolean shouldContinue() {
-		return !failed && waitIfFailed == 0 && this.doggoEntity.getHealth() < this.doggoEntity.getMaxHealth() && !this.doggoEntity.isNavigating() && isNextToBowl() || eating > 0 || whineTime > 0;
+	public boolean canContinueToUse() {
+		return !failed && waitIfFailed == 0 && this.doggoEntity.getHealth() < this.doggoEntity.getMaxHealth() && !this.doggoEntity.isPathFinding() && isNextToBowl() || eating > 0 || whineTime > 0;
 	}
 
 	@Override
-	public boolean canStart() {
-		if(!this.doggoEntity.isTamed()) {
+	public boolean canUse() {
+		if(!this.doggoEntity.isTame()) {
 			return false;
-		} else if(this.doggoEntity.isInsideWaterOrBubbleColumn()) {
+		} else if(this.doggoEntity.isInWaterOrBubble()) {
 			return false;
-		} else if(!this.doggoEntity.isOnGround()) {
+		} else if(!this.doggoEntity.onGround()) {
 			return false;
 		} else if(this.doggoEntity.hasStackInMouth()) {
 			return false;
-		} else if(this.doggoEntity.hasAngerTime()) {
+		} else if(this.doggoEntity.isAngry()) {
 			return false;
 		} else if(this.doggoEntity.getHealth() == this.doggoEntity.getMaxHealth()){
 			return false;
@@ -56,7 +56,7 @@ public class DoggoEatFromBowlGoal extends Goal {
 	}
 	
 	@Override
-	public boolean canStop() {
+	public boolean isInterruptable() {
 		return this.doggoEntity.hasBeenHurt() || this.doggoEntity.getHealth() == this.doggoEntity.getMaxHealth();
 	}
 
@@ -70,15 +70,15 @@ public class DoggoEatFromBowlGoal extends Goal {
 		this.failed = false;
 		this.eating = 0;
 		this.whineTime = 0;
-		this.bowlPos = BlockPos.findClosest(
-				this.doggoEntity.getBlockPos(),
+		this.bowlPos = BlockPos.findClosestMatch(
+				this.doggoEntity.blockPosition(),
 				16, 8,
 				(b) -> DogBowl.canEatFromBowl(b, doggoEntity));
 		
 		try {
-			Vec3d closestSide = getClosestSide(new Vec3d(bowlPos.get().getX(), bowlPos.get().getY(), bowlPos.get().getZ()));
+			Vec3 closestSide = getClosestSide(new Vec3(bowlPos.get().getX(), bowlPos.get().getY(), bowlPos.get().getZ()));
 			
-			this.doggoEntity.getNavigation().startMovingTo(closestSide.getX(), closestSide.getY(), closestSide.getZ(), 1);
+			this.doggoEntity.getNavigation().moveTo(closestSide.x(), closestSide.y(), closestSide.z(), 1);
 		} catch(NoSuchElementException ex) {
 			fail();
 		}
@@ -95,13 +95,13 @@ public class DoggoEatFromBowlGoal extends Goal {
 	public void tick() {
 		if(!failed) {
 			if(this.doggoEntity.isAction(DoggoAction.EATING_FROM_BOWL)) {
-				this.doggoEntity.getLookControl().lookAt(
+				this.doggoEntity.getLookControl().setLookAt(
 						this.doggoEntity.getBowlPos().getX() + 0.5,
 						0,
 						this.doggoEntity.getBowlPos().getZ() + 0.5, 10, 10);
 				
 				if(eating == 0) {
-					DogBowlEntity dogBowlEntity = (DogBowlEntity) this.doggoEntity.getWorld().getBlockEntity(this.doggoEntity.getBowlPos());
+					DogBowlEntity dogBowlEntity = (DogBowlEntity) this.doggoEntity.level().getBlockEntity(this.doggoEntity.getBowlPos());
 
 					if(dogBowlEntity != null && dogBowlEntity.hasFood()) {
 						eating = dogBowlEntity.getFoodHunger();
@@ -119,16 +119,16 @@ public class DoggoEatFromBowlGoal extends Goal {
 						}
 					}
 
-					this.doggoEntity.getWorld().playSound(null,
+					this.doggoEntity.level().playSound(null,
 							this.doggoEntity.getX(), this.doggoEntity.getY(), this.doggoEntity.getZ(),
-							SoundEvents.ENTITY_GENERIC_EAT, SoundCategory.NEUTRAL, 0.4f, 1f);
+							SoundEvents.GENERIC_EAT, SoundSource.NEUTRAL, 0.4f, 1f);
 				}
 				
 				if(eating > 0) {
 					eating--;
 				}
 			} else if(this.bowlPos.isPresent() && isNextToBowl()) {
-				if(this.doggoEntity.isNavigating()) {
+				if(this.doggoEntity.isPathFinding()) {
 					this.doggoEntity.getNavigation().stop();
 				}
 
@@ -137,7 +137,7 @@ public class DoggoEatFromBowlGoal extends Goal {
 				this.doggoEntity.setActionTicking(true);
 				this.doggoEntity.setFeeling(DoggoFeeling.HAPPY);
 				this.doggoEntity.dropStackInMouth();
-			} else if(!this.doggoEntity.isNavigating()) {
+			} else if(!this.doggoEntity.isPathFinding()) {
 				fail();
 			}
 		} else if(whineTime > 0) {
@@ -152,21 +152,21 @@ public class DoggoEatFromBowlGoal extends Goal {
 	
 	private void failAndWhine() {
 		fail();
-		this.doggoEntity.getWorld().playSound(
+		this.doggoEntity.level().playSound(
 				null,
 				this.doggoEntity.getX(), this.doggoEntity.getY(), this.doggoEntity.getZ(),
-				SoundEvents.ENTITY_WOLF_WHINE, SoundCategory.NEUTRAL, 0.4f, 1.05f);
+				SoundEvents.WOLF_WHINE, SoundSource.NEUTRAL, 0.4f, 1.05f);
 		whineTime = 40;
 	}
 	
-	private Vec3d getClosestSide(Vec3d position) {
-		Vec3d[] sides = new Vec3d[] {new Vec3d(0.4, 0, 0), new Vec3d(-0.4, 0, 0), new Vec3d(0, 0, 0.4), new Vec3d(0, 0, -0.4)};
+	private Vec3 getClosestSide(Vec3 position) {
+		Vec3[] sides = new Vec3[] {new Vec3(0.4, 0, 0), new Vec3(-0.4, 0, 0), new Vec3(0, 0, 0.4), new Vec3(0, 0, -0.4)};
 		
-		Vec3d closestSide = position.add(sides[0]).add(0.5, 0, 0.5);
-		double closest = position.add(sides[0]).add(0.5, 0, 0.5).distanceTo(this.doggoEntity.getPos());
+		Vec3 closestSide = position.add(sides[0]).add(0.5, 0, 0.5);
+		double closest = position.add(sides[0]).add(0.5, 0, 0.5).distanceTo(this.doggoEntity.position());
 		
 		for(int i = 1; i < sides.length; i++) {
-			double close = position.add(sides[i]).add(0.5, 0, 0.5).distanceTo(this.doggoEntity.getPos());
+			double close = position.add(sides[i]).add(0.5, 0, 0.5).distanceTo(this.doggoEntity.position());
 			
 			if(close < closest) {
 				closest = close;
@@ -179,7 +179,7 @@ public class DoggoEatFromBowlGoal extends Goal {
 	
 	private boolean isNextToBowl() {
 		try {
-			if(this.doggoEntity.getBlockPos().isWithinDistance(this.bowlPos.get(), 1.05)) {
+			if(this.doggoEntity.blockPosition().closerThan(this.bowlPos.get(), 1.05)) {
 				return true;
 			}
 			

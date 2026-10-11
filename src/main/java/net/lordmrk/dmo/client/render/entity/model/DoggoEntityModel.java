@@ -4,17 +4,17 @@ import com.google.common.collect.ImmutableList;
 
 import net.lordmrk.dmo.DoggoAction;
 import net.lordmrk.dmo.entity.DoggoEntity;
-import net.minecraft.client.model.ModelData;
-import net.minecraft.client.model.ModelPart;
-import net.minecraft.client.model.ModelPartBuilder;
-import net.minecraft.client.model.ModelPartData;
-import net.minecraft.client.model.ModelTransform;
-import net.minecraft.client.model.TexturedModelData;
-import net.minecraft.client.render.entity.model.EntityModelPartNames;
-import net.minecraft.client.render.entity.model.TintableAnimalModel;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.model.ColorableAgeableListModel;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartNames;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.util.Mth;
 
-public class DoggoEntityModel<T extends DoggoEntity> extends TintableAnimalModel<T> {
+public class DoggoEntityModel<T extends DoggoEntity> extends ColorableAgeableListModel<T> {
 
 	/**
 	 * The key of the real head model part, whose value is {@value}.
@@ -48,7 +48,7 @@ public class DoggoEntityModel<T extends DoggoEntity> extends TintableAnimalModel
 	protected final ModelPart neck;
 	protected final ModelPart mouth;
 
-	protected static final float PI = MathHelper.PI;
+	protected static final float PI = Mth.PI;
 	protected static final float PI_2 = PI * 2;
 	protected static final float PI_3 = PI * 3;
 	protected static final float PI_8 = PI * 8;
@@ -88,72 +88,72 @@ public class DoggoEntityModel<T extends DoggoEntity> extends TintableAnimalModel
 	protected static final float DEGREES_120 = DEGREES_1 * 120;
 	protected static final float DEGREES_125 = DEGREES_1 * 125;
 	protected static final float DEGREES_130 = DEGREES_1 * 130;
-	protected static final float DEGREES_180 = MathHelper.PI;
+	protected static final float DEGREES_180 = Mth.PI;
 	protected static final float DEGREES_270 = DEGREES_1 * 270;
 	protected static final float DEGREES_333 = DEGREES_1 * 333;
 
 	public DoggoEntityModel(ModelPart root) {
-		this.head = root.getChild(EntityModelPartNames.HEAD);
+		this.head = root.getChild(PartNames.HEAD);
 	    this.realHead = this.head.getChild("real_head");
 		this.mouth = this.realHead.getChild("doggo_mouth");
-	    this.torso = root.getChild(EntityModelPartNames.BODY);
+	    this.torso = root.getChild(PartNames.BODY);
 	    this.neck = root.getChild("upper_body");
-	    this.rightHindLeg = root.getChild(EntityModelPartNames.RIGHT_HIND_LEG);
-	    this.leftHindLeg = root.getChild(EntityModelPartNames.LEFT_HIND_LEG);
-	    this.rightFrontLeg = root.getChild(EntityModelPartNames.RIGHT_FRONT_LEG);
-	    this.leftFrontLeg = root.getChild(EntityModelPartNames.LEFT_FRONT_LEG);
-	    this.tail = root.getChild(EntityModelPartNames.TAIL);
+	    this.rightHindLeg = root.getChild(PartNames.RIGHT_HIND_LEG);
+	    this.leftHindLeg = root.getChild(PartNames.LEFT_HIND_LEG);
+	    this.rightFrontLeg = root.getChild(PartNames.RIGHT_FRONT_LEG);
+	    this.leftFrontLeg = root.getChild(PartNames.LEFT_FRONT_LEG);
+	    this.tail = root.getChild(PartNames.TAIL);
 	    this.realTail = this.tail.getChild("real_tail");
 	}
 
-	public static TexturedModelData getTexturedModelData() {
-		ModelData modelData = new ModelData();
-		ModelPartData modelPartData = modelData.getRoot();
+	public static LayerDefinition getTexturedModelData() {
+		MeshDefinition modelData = new MeshDefinition();
+		PartDefinition modelPartData = modelData.getRoot();
 
 		// Head
-		ModelPartData modelPartData2 = modelPartData.addChild(EntityModelPartNames.HEAD, ModelPartBuilder.create(), ModelTransform.pivot(-1.0F, 13.5F, -7.0F));
-		modelPartData2.addChild("real_head", ModelPartBuilder.create().uv(0, 0).cuboid(-2.0F, -3.0F, -2.0F, 6.0F, 6.0F, 4.0F).uv(16, 14).cuboid(-2.0F, -5.0F, 0.0F, 2.0F, 2.0F, 1.0F).uv(16, 14).cuboid(2.0F, -5.0F, 0.0F, 2.0F, 2.0F, 1.0F).uv(0, 10).cuboid(-0.5F, 0.0F, -5.0F, 3.0F, 2.0F, 4.0F), ModelTransform.NONE)
-			.addChild("doggo_mouth", ModelPartBuilder.create().uv(43, 14).cuboid(-0.5F, 0.0F, -5.0F, 3.0F, 1.0F, 4.0F), ModelTransform.pivot(0.0F, 2.0F, 0.0F));
+		PartDefinition modelPartData2 = modelPartData.addOrReplaceChild(PartNames.HEAD, CubeListBuilder.create(), PartPose.offset(-1.0F, 13.5F, -7.0F));
+		modelPartData2.addOrReplaceChild("real_head", CubeListBuilder.create().texOffs(0, 0).addBox(-2.0F, -3.0F, -2.0F, 6.0F, 6.0F, 4.0F).texOffs(16, 14).addBox(-2.0F, -5.0F, 0.0F, 2.0F, 2.0F, 1.0F).texOffs(16, 14).addBox(2.0F, -5.0F, 0.0F, 2.0F, 2.0F, 1.0F).texOffs(0, 10).addBox(-0.5F, 0.0F, -5.0F, 3.0F, 2.0F, 4.0F), PartPose.ZERO)
+			.addOrReplaceChild("doggo_mouth", CubeListBuilder.create().texOffs(43, 14).addBox(-0.5F, 0.0F, -5.0F, 3.0F, 1.0F, 4.0F), PartPose.offset(0.0F, 2.0F, 0.0F));
 
 		// Body
-		modelPartData.addChild(EntityModelPartNames.BODY, ModelPartBuilder.create().uv(18, 14).cuboid(-3.0F, -2.0F, -3.0F, 6.0F, 9.0F, 6.0F), ModelTransform.of(0.0F, 14.0F, 2.0F, 1.5707964F, 0.0F, 0.0F));
-		modelPartData.addChild("upper_body", ModelPartBuilder.create().uv(21, 0).cuboid(-3.0F, -3.0F, -3.0F, 8.0F, 6.0F, 7.0F), ModelTransform.of(-1.0F, 14.0F, -3.0F, 1.5707964F, 0.0F, 0.0F));
+		modelPartData.addOrReplaceChild(PartNames.BODY, CubeListBuilder.create().texOffs(18, 14).addBox(-3.0F, -2.0F, -3.0F, 6.0F, 9.0F, 6.0F), PartPose.offsetAndRotation(0.0F, 14.0F, 2.0F, 1.5707964F, 0.0F, 0.0F));
+		modelPartData.addOrReplaceChild("upper_body", CubeListBuilder.create().texOffs(21, 0).addBox(-3.0F, -3.0F, -3.0F, 8.0F, 6.0F, 7.0F), PartPose.offsetAndRotation(-1.0F, 14.0F, -3.0F, 1.5707964F, 0.0F, 0.0F));
 
 		// Legs
-		ModelPartBuilder modelPartBuilder = ModelPartBuilder.create().uv(0, 18).cuboid(0.0F, 0.0F, -1.0F, 2.0F, 8.0F, 2.0F);
-		modelPartData.addChild(EntityModelPartNames.RIGHT_HIND_LEG, modelPartBuilder, ModelTransform.pivot(-2.5F, 16.0F, 7.0F));
-		modelPartData.addChild(EntityModelPartNames.LEFT_HIND_LEG, modelPartBuilder, ModelTransform.pivot(0.5F, 16.0F, 7.0F));
-		modelPartData.addChild(EntityModelPartNames.RIGHT_FRONT_LEG, modelPartBuilder, ModelTransform.pivot(-2.5F, 16.0F, -4.0F));
-		modelPartData.addChild(EntityModelPartNames.LEFT_FRONT_LEG, modelPartBuilder, ModelTransform.pivot(0.5F, 16.0F, -4.0F));
+		CubeListBuilder modelPartBuilder = CubeListBuilder.create().texOffs(0, 18).addBox(0.0F, 0.0F, -1.0F, 2.0F, 8.0F, 2.0F);
+		modelPartData.addOrReplaceChild(PartNames.RIGHT_HIND_LEG, modelPartBuilder, PartPose.offset(-2.5F, 16.0F, 7.0F));
+		modelPartData.addOrReplaceChild(PartNames.LEFT_HIND_LEG, modelPartBuilder, PartPose.offset(0.5F, 16.0F, 7.0F));
+		modelPartData.addOrReplaceChild(PartNames.RIGHT_FRONT_LEG, modelPartBuilder, PartPose.offset(-2.5F, 16.0F, -4.0F));
+		modelPartData.addOrReplaceChild(PartNames.LEFT_FRONT_LEG, modelPartBuilder, PartPose.offset(0.5F, 16.0F, -4.0F));
 
 		// Tail
-		ModelPartData modelPartData3 = modelPartData.addChild(EntityModelPartNames.TAIL, ModelPartBuilder.create(), ModelTransform.of(-1.0F, 12.0F, 8.0F, 0.62831855F, 0.0F, 0.0F));
-		modelPartData3.addChild("real_tail", ModelPartBuilder.create().uv(9, 18).cuboid(0.0F, 0.0F, -1.0F, 2.0F, 8.0F, 2.0F), ModelTransform.NONE);
+		PartDefinition modelPartData3 = modelPartData.addOrReplaceChild(PartNames.TAIL, CubeListBuilder.create(), PartPose.offsetAndRotation(-1.0F, 12.0F, 8.0F, 0.62831855F, 0.0F, 0.0F));
+		modelPartData3.addOrReplaceChild("real_tail", CubeListBuilder.create().texOffs(9, 18).addBox(0.0F, 0.0F, -1.0F, 2.0F, 8.0F, 2.0F), PartPose.ZERO);
 
-		return TexturedModelData.of(modelData, 64, 32);
+		return LayerDefinition.create(modelData, 64, 32);
 	}
 
-	protected Iterable<ModelPart> getHeadParts() {
+	protected Iterable<ModelPart> headParts() {
 		return ImmutableList.of(this.head);
 	}
 
-	protected Iterable<ModelPart> getBodyParts() {
+	protected Iterable<ModelPart> bodyParts() {
 		return ImmutableList.of(this.torso, this.rightHindLeg, this.leftHindLeg, this.rightFrontLeg, this.leftFrontLeg, this.tail, this.neck);
 	}
 
-	public void setAngles(T doggoEntity, float f, float g, float h, float i, float j) {
+	public void setupAnim(T doggoEntity, float f, float g, float h, float i, float j) {
 		switch(doggoEntity.getAction()) {
 		case NAPPING:
 			return;
 		case EATING_FROM_BOWL:
-			this.head.pitch = 0.69813170f;
-			this.head.yaw = i * 0.017453292F;
+			this.head.xRot = 0.69813170f;
+			this.head.yRot = i * 0.017453292F;
 			break;
 		case EATING:
 		case NEUTRAL:
 		case PLAY_TIME:
-			this.head.pitch = j * 0.017453292F;
-			this.head.yaw = i * 0.017453292F;
+			this.head.xRot = j * 0.017453292F;
+			this.head.yRot = i * 0.017453292F;
 		}
 
 		tail(doggoEntity, h);
@@ -162,29 +162,29 @@ public class DoggoEntityModel<T extends DoggoEntity> extends TintableAnimalModel
 
 	private void setMouth(T doggoEntity) {
 		if(doggoEntity.hasMouthOpened() || doggoEntity.hasStackInMouth()) {
-			this.mouth.pitch = 0.17453292f;
+			this.mouth.xRot = 0.17453292f;
 		} else {
-			this.mouth.pitch = 0f;
+			this.mouth.xRot = 0f;
 		}
 	}
 	
 	private void tail(DoggoEntity doggoEntity, float h) {
 		if(!doggoEntity.isInSittingPose() && !doggoEntity.isAction(DoggoAction.LISTENING) && !doggoEntity.isAction(DoggoAction.SCRATCHING)) {
-			h += (this.torso.pitch - 1.57079632f);
+			h += (this.torso.xRot - 1.57079632f);
 		}
 
 		switch(doggoEntity.getFeeling()) {
 		case NEUTRAL:
-			this.tail.yaw = 0f;
-			this.tail.pitch = h;
+			this.tail.yRot = 0f;
+			this.tail.xRot = h;
 			return;
 		case HAPPY:
-			this.tail.yaw = MathHelper.cos(doggoEntity.getAnimationTick()) * 0.4f;
-			this.tail.pitch = h;
+			this.tail.yRot = Mth.cos(doggoEntity.getAnimationTick()) * 0.4f;
+			this.tail.xRot = h;
 			return;
 		case SAD:
-			this.tail.yaw = 0f;
-			this.tail.pitch = 40f;
+			this.tail.yRot = 0f;
+			this.tail.xRot = 40f;
 			return;
 		}
 	}

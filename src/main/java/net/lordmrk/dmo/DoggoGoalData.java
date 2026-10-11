@@ -1,6 +1,6 @@
 package net.lordmrk.dmo;
 
-import net.minecraft.util.math.random.Random;
+import net.minecraft.util.RandomSource;
 
 public class DoggoGoalData {
 
@@ -9,11 +9,11 @@ public class DoggoGoalData {
     private int delayTicks;
     private int failedChanceAttempts;
     private final int minDelayTicks;
-    private final Random random;
+    private final RandomSource random;
 
     public static float DEFAULT_CHANCE = 0.001f;
 
-    public DoggoGoalData(Random random, int minDelayTicks, int delayRandomness) {
+    public DoggoGoalData(RandomSource random, int minDelayTicks, int delayRandomness) {
         this.chance = DEFAULT_CHANCE;
         this.delayRandomness = delayRandomness;
         this.delayTicks = 200;

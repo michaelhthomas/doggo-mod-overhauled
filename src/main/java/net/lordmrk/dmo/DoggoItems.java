@@ -2,13 +2,16 @@ package net.lordmrk.dmo;
 
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.lordmrk.dmo.item.TennisBall;
-import net.minecraft.item.*;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.util.DyeColor;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.ItemLike;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,13 +30,13 @@ public class DoggoItems {
         addItemsToItemGroup(DoggoItemGroups.DOG_STUFF_REGISTRY_KEY, TOY_LIST, Items.ENDER_EYE);
     }
 
-    private static void addItemsToItemGroup(RegistryKey<ItemGroup> registryKey, List<AbstractMap.SimpleEntry<String, Item>> itemList, ItemConvertible addAfter) {
+    private static void addItemsToItemGroup(ResourceKey<CreativeModeTab> registryKey, List<AbstractMap.SimpleEntry<String, Item>> itemList, ItemLike addAfter) {
         ItemGroupEvents.modifyEntriesEvent(registryKey).register(content -> {
-            ItemConvertible lastItem = addAfter;
+            ItemLike lastItem = addAfter;
 
             for(AbstractMap.SimpleEntry<String, Item> entry : itemList) {
                 if(lastItem == null) {
-                    content.add(entry.getValue());
+                    content.accept(entry.getValue());
                 } else {
                     content.addAfter(lastItem, entry.getValue());
                 }
@@ -44,7 +47,7 @@ public class DoggoItems {
     }
 
     public static void addToToolItemsItemGroup() {
-        addItemsToItemGroup(ItemGroups.TOOLS, TOY_LIST, Items.ENDER_EYE);
+        addItemsToItemGroup(CreativeModeTabs.TOOLS_AND_UTILITIES, TOY_LIST, Items.ENDER_EYE);
     }
 
     public static TennisBall getTennisBall(DyeColor color) {
@@ -69,7 +72,7 @@ public class DoggoItems {
     }
 
     private static void registerItem(String id, Item item) {
-        Registry.register(Registries.ITEM, new Identifier(DoggoModOverhauled.MODID, id), item);
+        Registry.register(BuiltInRegistries.ITEM, new ResourceLocation(DoggoModOverhauled.MODID, id), item);
     }
 
     static {

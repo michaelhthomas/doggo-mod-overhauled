@@ -5,10 +5,9 @@ import java.util.EnumSet;
 import net.lordmrk.dmo.DoggoAction;
 import net.lordmrk.dmo.DoggoFeeling;
 import net.lordmrk.dmo.entity.DoggoEntity;
-import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.item.FoodComponent;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.ai.goal.Goal;
 
 public class DoggoEatGoal extends Goal {
 
@@ -17,21 +16,21 @@ public class DoggoEatGoal extends Goal {
 	
 	public DoggoEatGoal(DoggoEntity doggoEntity) {
 		this.doggoEntity = doggoEntity;
-		this.setControls(EnumSet.of(Goal.Control.JUMP, Goal.Control.MOVE, Goal.Control.LOOK));
+		this.setFlags(EnumSet.of(Goal.Flag.JUMP, Goal.Flag.MOVE, Goal.Flag.LOOK));
 	}
 
 	@Override
-	public boolean shouldContinue() {
+	public boolean canContinueToUse() {
 		return eating > 0;
 	}
 
 	@Override
-	public boolean canStart() {
-		if(this.doggoEntity.isInsideWaterOrBubbleColumn()) {
+	public boolean canUse() {
+		if(this.doggoEntity.isInWaterOrBubble()) {
 			return false;
-		} else if(!this.doggoEntity.isOnGround()) {
+		} else if(!this.doggoEntity.onGround()) {
 			return false;
-		} else if(this.doggoEntity.hasAngerTime()) {
+		} else if(this.doggoEntity.isAngry()) {
 			return false;
 		}
 		
@@ -39,15 +38,15 @@ public class DoggoEatGoal extends Goal {
 	}
 	
 	@Override
-	public boolean canStop() {
+	public boolean isInterruptable() {
 		return this.doggoEntity.hasBeenHurt() || eating == 0;
 	}
 
 	@Override
 	public void start() {
-		eating = doggoEntity.getStackInMouth().getItem().getFoodComponent().getHunger() * 4;
+		eating = doggoEntity.getStackInMouth().getItem().getFoodProperties().getNutrition() * 4;
 		
-		if(doggoEntity.isSitting()) {
+		if(doggoEntity.isOrderedToSit()) {
 			doggoEntity.setInSittingPose(true);
 		}
 
@@ -60,7 +59,7 @@ public class DoggoEatGoal extends Goal {
 	public void stop() {
 		doggoEntity.setStackInMouth(null);
 		
-		if(!doggoEntity.isSitting()) {
+		if(!doggoEntity.isOrderedToSit()) {
 			doggoEntity.setInSittingPose(false);
 		}
 
@@ -78,9 +77,9 @@ public class DoggoEatGoal extends Goal {
 				}
 			}
 
-			doggoEntity.getWorld().playSound(null,
+			doggoEntity.level().playSound(null,
 					doggoEntity.getX(), doggoEntity.getY(), doggoEntity.getZ(),
-					SoundEvents.ENTITY_GENERIC_EAT, SoundCategory.NEUTRAL, 0.4f, 1f);
+					SoundEvents.GENERIC_EAT, SoundSource.NEUTRAL, 0.4f, 1f);
 		}
 		
 		eating--;

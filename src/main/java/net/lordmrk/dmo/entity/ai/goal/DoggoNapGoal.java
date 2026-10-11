@@ -4,8 +4,8 @@ import java.util.EnumSet;
 
 import net.lordmrk.dmo.DoggoAction;
 import net.lordmrk.dmo.entity.DoggoEntity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.goal.Goal;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.goal.Goal;
 
 public class DoggoNapGoal extends Goal {
 
@@ -13,21 +13,21 @@ public class DoggoNapGoal extends Goal {
 
 	public DoggoNapGoal(DoggoEntity doggoEntity) {
 		this.doggoEntity = doggoEntity;
-		this.setControls(EnumSet.of(Goal.Control.JUMP, Goal.Control.MOVE, Goal.Control.LOOK));
+		this.setFlags(EnumSet.of(Goal.Flag.JUMP, Goal.Flag.MOVE, Goal.Flag.LOOK));
 	}
 
 	@Override
-	public boolean shouldContinue() {
-		return !this.doggoEntity.isInsideWaterOrBubbleColumn() && this.doggoEntity.isOnGround() && !this.doggoEntity.isOwnerClose();
+	public boolean canContinueToUse() {
+		return !this.doggoEntity.isInWaterOrBubble() && this.doggoEntity.onGround() && !this.doggoEntity.isOwnerClose();
 	}
 
 	@Override
-	public boolean canStart() {
-		if(!this.doggoEntity.isTamed()) {
+	public boolean canUse() {
+		if(!this.doggoEntity.isTame()) {
 			return false;
-		} else if(this.doggoEntity.isInsideWaterOrBubbleColumn()) {
+		} else if(this.doggoEntity.isInWaterOrBubble()) {
 			return false;
-		} else if(!this.doggoEntity.isOnGround()) {
+		} else if(!this.doggoEntity.onGround()) {
 			return false;
 		} else if(!this.doggoEntity.isInSittingPose()) {
 			return false;
@@ -35,20 +35,20 @@ public class DoggoNapGoal extends Goal {
 			return false;
 		} else if(this.doggoEntity.isOwnerClose()) {
 			return false;
-		} else if(this.doggoEntity.hasAngerTime()) {
+		} else if(this.doggoEntity.isAngry()) {
 			return false;
 		} else {
 			LivingEntity livingEntity = this.doggoEntity.getOwner();
 			if(livingEntity == null) {
 				return true;
 			} else {
-				return livingEntity.getAttacker() != null ? false : this.doggoEntity.getRandom().nextFloat() < 0.01F;
+				return livingEntity.getLastHurtByMob() != null ? false : this.doggoEntity.getRandom().nextFloat() < 0.01F;
 			}
 		}
 	}
 	
 	@Override
-	public boolean canStop() {
+	public boolean isInterruptable() {
 		return this.doggoEntity.hasBeenHurt() || this.doggoEntity.isOwnerClose();
 	}
 

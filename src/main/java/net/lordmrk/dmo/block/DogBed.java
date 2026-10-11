@@ -2,34 +2,37 @@ package net.lordmrk.dmo.block;
 
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.lordmrk.dmo.StringUtils;
-import net.minecraft.block.*;
-import net.minecraft.block.piston.PistonBehavior;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.sound.BlockSoundGroup;
-import net.minecraft.state.StateManager;
-import net.minecraft.state.property.Properties;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.DyeColor;
-import net.minecraft.util.function.BooleanBiFunction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.util.shape.VoxelShapes;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.HorizontalDirectionalBlock;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.WoodType;
+import net.minecraft.world.level.material.PushReaction;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.BooleanOp;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
-public class DogBed extends HorizontalFacingBlock {
+public class DogBed extends HorizontalDirectionalBlock {
 
-    protected static final VoxelShape BOTTOM = Block.createCuboidShape(-4.0, 0.0, -4.0, 20.0, 8.0, 20.0);
-    protected static final VoxelShape EMPTY = Block.createCuboidShape(-3.0, 4.0, -3.0, 19.0, 8.0, 19.0);
-    protected static final VoxelShape EMPTY_EAST = Block.createCuboidShape(19.0, 4.0, 0.0, 20.0, 8.0, 16.0);
-    protected static final VoxelShape EMPTY_NORTH = Block.createCuboidShape(0.0, 4.0, -4.0, 16.0, 8.0, -3.0);
-    protected static final VoxelShape EMPTY_SOUTH = Block.createCuboidShape(0.0, 4.0, 19.0, 16.0, 8.0, 20.0);
-    protected static final VoxelShape EMPTY_WEST = Block.createCuboidShape(-4.0, 4.0, 0.0, -3.0, 8.0, 16.0);
+    protected static final VoxelShape BOTTOM = Block.box(-4.0, 0.0, -4.0, 20.0, 8.0, 20.0);
+    protected static final VoxelShape EMPTY = Block.box(-3.0, 4.0, -3.0, 19.0, 8.0, 19.0);
+    protected static final VoxelShape EMPTY_EAST = Block.box(19.0, 4.0, 0.0, 20.0, 8.0, 16.0);
+    protected static final VoxelShape EMPTY_NORTH = Block.box(0.0, 4.0, -4.0, 16.0, 8.0, -3.0);
+    protected static final VoxelShape EMPTY_SOUTH = Block.box(0.0, 4.0, 19.0, 16.0, 8.0, 20.0);
+    protected static final VoxelShape EMPTY_WEST = Block.box(-4.0, 4.0, 0.0, -3.0, 8.0, 16.0);
 
     protected static final VoxelShape SHAPE_EAST;
     protected static final VoxelShape SHAPE_NORTH;
@@ -42,27 +45,27 @@ public class DogBed extends HorizontalFacingBlock {
     //private final String name;
 
     public DogBed(DyeColor color, WoodType woodType) {
-        super(FabricBlockSettings.create().sounds(BlockSoundGroup.WOOD).strength(0.2F).nonOpaque().burnable().pistonBehavior(PistonBehavior.DESTROY));
+        super(FabricBlockSettings.of().sound(SoundType.WOOD).strength(0.2F).noOcclusion().ignitedByLava().pushReaction(PushReaction.DESTROY));
 
         this.color = color;
         //String[] woodModColonName = woodType.name().split(":");
         //this.name = StringUtils.capitalizeEveryWord(color.getName().replaceAll("_", " ")) + " " + StringUtils.capitalizeEveryWord(woodModColonName[woodModColonName.length - 1].replaceAll("_", " ")) + " Dog Bed";
         this.woodType = woodType;
 
-        this.setDefaultState(this.getDefaultState().with(Properties.HORIZONTAL_FACING, Direction.NORTH));
+        this.registerDefaultState(this.defaultBlockState().setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.NORTH));
     }
 
     @Override
-    protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-        builder.add(Properties.HORIZONTAL_FACING);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+        builder.add(BlockStateProperties.HORIZONTAL_FACING);
     }
 
     private void bounceEntity(Entity entity) {
-        Vec3d vec = entity.getVelocity();
+        Vec3 vec = entity.getDeltaMovement();
 
         if (vec.y < 0.0D) {
             double d = entity instanceof LivingEntity ? 1.0D : 0.8D;
-            entity.setVelocity(vec.x, -vec.y * 0.6600000262260437D * d, vec.z);
+            entity.setDeltaMovement(vec.x, -vec.y * 0.6600000262260437D * d, vec.z);
         }
     }
 
@@ -76,8 +79,8 @@ public class DogBed extends HorizontalFacingBlock {
     }*/
 
     @Override
-    public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-        Direction direction = state.get(FACING);
+    public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
+        Direction direction = state.getValue(FACING);
 
         switch(direction) {
             case NORTH:
@@ -92,13 +95,13 @@ public class DogBed extends HorizontalFacingBlock {
     }
 
     @Override
-    public BlockState getPlacementState(ItemPlacementContext ctx) {
-        return super.getPlacementState(ctx).with(Properties.HORIZONTAL_FACING, ctx.getHorizontalPlayerFacing().getOpposite());
+    public BlockState getStateForPlacement(BlockPlaceContext ctx) {
+        return super.getStateForPlacement(ctx).setValue(BlockStateProperties.HORIZONTAL_FACING, ctx.getHorizontalDirection().getOpposite());
     }
 
     @Override
-    public BlockRenderType getRenderType(BlockState state) {
-        return BlockRenderType.MODEL;
+    public RenderShape getRenderShape(BlockState state) {
+        return RenderShape.MODEL;
     }
 
     public WoodType getWoodType() {
@@ -106,9 +109,9 @@ public class DogBed extends HorizontalFacingBlock {
     }
 
     @Override
-    public void onEntityLand(BlockView world, Entity entity) {
-        if(entity.bypassesLandingEffects()) {
-            super.onEntityLand(world, entity);
+    public void updateEntityAfterFallOn(BlockGetter world, Entity entity) {
+        if(entity.isSuppressingBounce()) {
+            super.updateEntityAfterFallOn(world, entity);
             return;
         }
 
@@ -116,14 +119,14 @@ public class DogBed extends HorizontalFacingBlock {
     }
 
     @Override
-    public void onLandedUpon(World world, BlockState state, BlockPos pos, Entity entity, float fallDistance) {
-        super.onLandedUpon(world, state, pos, entity, fallDistance * 0.5F);
+    public void fallOn(Level world, BlockState state, BlockPos pos, Entity entity, float fallDistance) {
+        super.fallOn(world, state, pos, entity, fallDistance * 0.5F);
     }
 
     static {
-        SHAPE_EAST = VoxelShapes.combineAndSimplify(BOTTOM, VoxelShapes.union(EMPTY, EMPTY_EAST), BooleanBiFunction.ONLY_FIRST);
-        SHAPE_NORTH = VoxelShapes.combineAndSimplify(BOTTOM, VoxelShapes.union(EMPTY, EMPTY_NORTH), BooleanBiFunction.ONLY_FIRST);
-        SHAPE_SOUTH = VoxelShapes.combineAndSimplify(BOTTOM, VoxelShapes.union(EMPTY, EMPTY_SOUTH), BooleanBiFunction.ONLY_FIRST);
-        SHAPE_WEST = VoxelShapes.combineAndSimplify(BOTTOM, VoxelShapes.union(EMPTY, EMPTY_WEST), BooleanBiFunction.ONLY_FIRST);
+        SHAPE_EAST = Shapes.join(BOTTOM, Shapes.or(EMPTY, EMPTY_EAST), BooleanOp.ONLY_FIRST);
+        SHAPE_NORTH = Shapes.join(BOTTOM, Shapes.or(EMPTY, EMPTY_NORTH), BooleanOp.ONLY_FIRST);
+        SHAPE_SOUTH = Shapes.join(BOTTOM, Shapes.or(EMPTY, EMPTY_SOUTH), BooleanOp.ONLY_FIRST);
+        SHAPE_WEST = Shapes.join(BOTTOM, Shapes.or(EMPTY, EMPTY_WEST), BooleanOp.ONLY_FIRST);
     }
 }

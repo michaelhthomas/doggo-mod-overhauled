@@ -3,48 +3,48 @@ package net.lordmrk.dmo.entity.ai.goal;
 import java.util.EnumSet;
 
 import net.lordmrk.dmo.entity.DoggoEntity;
-import net.minecraft.entity.ai.TargetPredicate;
-import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.util.Hand;
-import net.minecraft.world.World;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.targeting.TargetingConditions;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
 
 public class DoggoBegGoal extends Goal {
 
 	private final DoggoEntity doggoEntity;
-	private PlayerEntity begFrom;
-	private final World world;
+	private Player begFrom;
+	private final Level world;
 	private final float begDistance;
 	private int timer;
-	private final TargetPredicate validPlayerPredicate;
+	private final TargetingConditions validPlayerPredicate;
 
 	public DoggoBegGoal(DoggoEntity doggoEntity, float begDistance) {
 	      this.doggoEntity = doggoEntity;
-	      this.world = doggoEntity.getWorld();
+	      this.world = doggoEntity.level();
 	      this.begDistance = begDistance;
-	      this.validPlayerPredicate = TargetPredicate.createNonAttackable().setBaseMaxDistance(begDistance);
-	      this.setControls(EnumSet.of(Goal.Control.LOOK));
+	      this.validPlayerPredicate = TargetingConditions.forNonCombat().range(begDistance);
+	      this.setFlags(EnumSet.of(Goal.Flag.LOOK));
 	}
 
-	public boolean canStart() {
+	public boolean canUse() {
 		if(this.doggoEntity.hasStackInMouth()) {
 			return false;
 		}
 		
-		this.begFrom = this.world.getClosestPlayer(this.validPlayerPredicate, this.doggoEntity);
+		this.begFrom = this.world.getNearestPlayer(this.validPlayerPredicate, this.doggoEntity);
 		return this.begFrom != null && this.isAttractive(this.begFrom);
 	}
 
-	public boolean shouldContinue() {
+	public boolean canContinueToUse() {
 		if(!this.begFrom.isAlive()) {
 			return false;
-		} else if(this.doggoEntity.squaredDistanceTo(this.begFrom) > (double) (this.begDistance * this.begDistance)) {
+		} else if(this.doggoEntity.distanceToSqr(this.begFrom) > (double) (this.begDistance * this.begDistance)) {
 			return false;
 		} else if(this.doggoEntity.hasStackInMouth()) {
 			return false;
-		} else if(this.doggoEntity.hasAngerTime()) {
+		} else if(this.doggoEntity.isAngry()) {
 			return false;
 		} else {
 			return this.timer > 0 && this.isAttractive(this.begFrom);
@@ -62,19 +62,19 @@ public class DoggoBegGoal extends Goal {
 	}
 
 	public void tick() {
-		this.doggoEntity.getLookControl().lookAt(this.begFrom.getX(), this.begFrom.getEyeY(), this.begFrom.getZ(), 10.0F, (float) this.doggoEntity.getMaxLookPitchChange());
+		this.doggoEntity.getLookControl().setLookAt(this.begFrom.getX(), this.begFrom.getEyeY(), this.begFrom.getZ(), 10.0F, (float) this.doggoEntity.getMaxHeadXRot());
 		--this.timer;
 	}
 
-	private boolean isAttractive(PlayerEntity player) {
-		for (Hand hand : Hand.values()) {
-			ItemStack itemStack = player.getStackInHand(hand);
+	private boolean isAttractive(Player player) {
+		for (InteractionHand hand : InteractionHand.values()) {
+			ItemStack itemStack = player.getItemInHand(hand);
 
-			if (this.doggoEntity.isTamed() && itemStack.getItem() == Items.BONE) {
+			if (this.doggoEntity.isTame() && itemStack.getItem() == Items.BONE) {
 				return true;
 			}
 
-			if (this.doggoEntity.isBreedingItem(itemStack)) {
+			if (this.doggoEntity.isFood(itemStack)) {
 				return true;
 			}
 		}

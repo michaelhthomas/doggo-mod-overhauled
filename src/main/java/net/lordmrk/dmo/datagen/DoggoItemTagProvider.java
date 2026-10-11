@@ -5,14 +5,13 @@ import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagProvider;
 import net.lordmrk.dmo.DoggoBlocks;
 import net.lordmrk.dmo.DoggoItems;
 import net.lordmrk.dmo.DoggoModOverhauled;
-import net.minecraft.block.Block;
-import net.minecraft.item.Item;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.util.DyeColor;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
 import java.util.AbstractMap;
 import java.util.concurrent.CompletableFuture;
 
@@ -25,12 +24,12 @@ public class DoggoItemTagProvider extends FabricTagProvider.ItemTagProvider {
             DyeColor.RED, DyeColor.YELLOW, DyeColor.LIME, DyeColor.LIGHT_BLUE
     };
 
-    public DoggoItemTagProvider(FabricDataOutput output, CompletableFuture<RegistryWrapper.WrapperLookup> registriesFuture, BlockTagProvider blockTagProvider) {
+    public DoggoItemTagProvider(FabricDataOutput output, CompletableFuture<HolderLookup.Provider> registriesFuture, BlockTagProvider blockTagProvider) {
         super(output, registriesFuture, blockTagProvider);
     }
 
     @Override
-    protected void configure(RegistryWrapper.WrapperLookup registries) {
+    protected void addTags(HolderLookup.Provider registries) {
         FabricTagBuilder dogBedTag = getOrCreateTagBuilder(tag("dog_bed"));
         FabricTagBuilder dogBowlTag = getOrCreateTagBuilder(tag("dog_bowl"));
         FabricTagBuilder tennisBallTag = getOrCreateTagBuilder(tag("tennis_ball"));
@@ -49,6 +48,6 @@ public class DoggoItemTagProvider extends FabricTagProvider.ItemTagProvider {
     }
 
     private static TagKey<Item> tag(String path) {
-        return TagKey.of(RegistryKeys.ITEM, new Identifier(DoggoModOverhauled.MODID, path));
+        return TagKey.create(Registries.ITEM, new ResourceLocation(DoggoModOverhauled.MODID, path));
     }
 }

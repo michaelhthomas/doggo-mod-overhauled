@@ -1,11 +1,11 @@
 package net.lordmrk.dmo.entity.ai.goal;
 
 import net.lordmrk.dmo.entity.DoggoEntity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.goal.FleeEntityGoal;
-import net.minecraft.entity.passive.LlamaEntity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
+import net.minecraft.world.entity.animal.horse.Llama;
 
-public class DoggoAvoidLlamaGoal<T extends LivingEntity> extends FleeEntityGoal<T> {
+public class DoggoAvoidLlamaGoal<T extends LivingEntity> extends AvoidEntityGoal<T> {
 
     private final DoggoEntity doggoEntity;
 
@@ -14,15 +14,15 @@ public class DoggoAvoidLlamaGoal<T extends LivingEntity> extends FleeEntityGoal<
         this.doggoEntity = doggoEntity;
     }
 
-    public boolean canStart() {
-        if (super.canStart() && this.targetEntity instanceof LlamaEntity) {
-            return !this.doggoEntity.isTamed() && this.isScaredOf((LlamaEntity)this.targetEntity);
+    public boolean canUse() {
+        if (super.canUse() && this.toAvoid instanceof Llama) {
+            return !this.doggoEntity.isTame() && this.isScaredOf((Llama)this.toAvoid);
         } else {
             return false;
         }
     }
 
-    private boolean isScaredOf(LlamaEntity llama) {
+    private boolean isScaredOf(Llama llama) {
         return llama.getStrength() >= doggoEntity.getRandom().nextInt(5);
     }
 
