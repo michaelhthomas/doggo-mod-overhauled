@@ -57,7 +57,7 @@ public class ReiPlugin implements REIClientPlugin {
 
     private void addDescription(DisplayRegistry registry, Item item, Component... lines) {
         ItemStack itemStack = item.getDefaultInstance();
-        DefaultInformationDisplay info = DefaultInformationDisplay.createFromEntry(EntryStacks.of(itemStack), itemStack.getHoverName());
+        DefaultInformationDisplay info = DefaultInformationDisplay.createFromEntry(EntryStacks.ofItemHolder(item.builtInRegistryHolder()), itemStack.getHoverName());
 
         info.lines(lines);
         registry.add(info);

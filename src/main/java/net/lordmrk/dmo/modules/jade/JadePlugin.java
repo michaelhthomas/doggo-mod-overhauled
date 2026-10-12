@@ -9,7 +9,7 @@ public class JadePlugin implements IWailaPlugin {
 
     @Override
     public void register(IWailaCommonRegistration registration) {
-        registration.registerBlockDataProvider(DoggoBowlComponentProvider.INSTANCE, DogBowlEntity.class);
+        registration.registerBlockDataProvider(DoggoBowlDataProvider.INSTANCE, DogBowlEntity.class);
         //registration.registerEntityDataProvider(DebugDoggoComponentProvider.INSTANCE, DoggoEntity.class);
     }
 
