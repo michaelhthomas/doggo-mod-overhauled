@@ -1,17 +1,17 @@
 package net.lordmrk.dmo.client.render.entity.model;
 
-import net.lordmrk.dmo.entity.DoggoEntity;
+import net.lordmrk.dmo.client.render.entity.DoggoRenderState;
 import net.minecraft.client.model.geom.ModelPart;
 
-public class DoggoModelNapping extends DoggoEntityModel<DoggoEntity> {
+public class DoggoModelNapping extends DoggoEntityModel {
 	
 	public DoggoModelNapping(ModelPart root) {
 		super(root);
 	}
 
 	@Override
-	public void prepareMobModel(DoggoEntity doggoEntity, float f, float g, float h) {
-		if(doggoEntity.isBaby()) {
+	public void setupAnim(DoggoRenderState state) {
+		if(state.isBaby) {
 			this.head.setPos(-2.5F, 16.0F, -6.0F);
 		} else {
 			this.head.setPos(-2.5F, 21.0F, -6.0F);
@@ -40,5 +40,7 @@ public class DoggoModelNapping extends DoggoEntityModel<DoggoEntity> {
 		this.leftHindLeg.setPos(0.5F, 23.0F, 7.0F);
 		this.leftHindLeg.yRot = DEGREES_50;
 		this.leftHindLeg.xRot = -DEGREES_90;
+
+		super.setupAnim(state);
 	}
 }

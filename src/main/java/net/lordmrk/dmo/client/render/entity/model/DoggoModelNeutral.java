@@ -1,26 +1,27 @@
 package net.lordmrk.dmo.client.render.entity.model;
 
-import net.lordmrk.dmo.entity.DoggoEntity;
+import net.lordmrk.dmo.client.render.entity.DoggoRenderState;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.util.Mth;
 
-public class DoggoModelNeutral extends DoggoEntityModel<DoggoEntity> {
+public class DoggoModelNeutral extends DoggoEntityModel {
 	
 	public DoggoModelNeutral(ModelPart root) {
 		super(root);
 	}
 
 	@Override
-	public void prepareMobModel(DoggoEntity doggoEntity, float f, float g, float h) {
-		if(doggoEntity.isInLieDownPose()) {
+	public void setupAnim(DoggoRenderState state) {
+		if(state.inLieDownPose) {
 			lieDown();
-		} else if(doggoEntity.isInSittingPose()) {
+		} else if(state.inSittingPose) {
 			sitting();
 		} else {
-			standing(f, g);
+			standing(state.walkAnimationPos, state.walkAnimationSpeed);
 		}
 		
-		shakingAndBegging(doggoEntity, h);
+		shakingAndBegging(state);
+		super.setupAnim(state);
 	}
 
 	private void lieDown() {
@@ -48,11 +49,11 @@ public class DoggoModelNeutral extends DoggoEntityModel<DoggoEntity> {
 		this.rightHindLeg.xRot = -DEGREES_90;
 	}
 	
-	private void shakingAndBegging(DoggoEntity doggoEntity, float h) {
-		this.realHead.zRot = doggoEntity.getBegAnimationProgress(h) + doggoEntity.getShakeAnimationProgress(h, 0.0F);
-		this.neck.zRot = doggoEntity.getShakeAnimationProgress(h, -0.08F);
-		this.torso.zRot = doggoEntity.getShakeAnimationProgress(h, -0.16F);
-		this.realTail.zRot = doggoEntity.getShakeAnimationProgress(h, -0.2F);
+	private void shakingAndBegging(DoggoRenderState state) {
+		this.realHead.zRot = state.getBegAnimationProgress() + state.getShakeAnimationProgress(0.0F);
+		this.neck.zRot = state.getShakeAnimationProgress(-0.08F);
+		this.torso.zRot = state.getShakeAnimationProgress(-0.16F);
+		this.realTail.zRot = state.getShakeAnimationProgress(-0.2F);
 	}
 
 	private void sitting() {

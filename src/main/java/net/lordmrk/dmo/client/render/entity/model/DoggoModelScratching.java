@@ -1,29 +1,31 @@
 package net.lordmrk.dmo.client.render.entity.model;
 
-import net.lordmrk.dmo.entity.DoggoEntity;
+import net.lordmrk.dmo.client.render.entity.DoggoRenderState;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.util.Mth;
 
-public class DoggoModelScratching extends DoggoEntityModel<DoggoEntity> {
+public class DoggoModelScratching extends DoggoEntityModel {
 	
 	public DoggoModelScratching(ModelPart root) {
 		super(root);
 	}
 
 	@Override
-	public void prepareMobModel(DoggoEntity doggoEntity, float f, float g, float h) {
-		if(doggoEntity.getScratchingSide() == 0) {
-			scratchingLeft(doggoEntity);
+	public void setupAnim(DoggoRenderState state) {
+		if(state.scratchingSide == 0) {
+			scratchingLeft(state);
 		} else {
-			scratchingRight(doggoEntity);
+			scratchingRight(state);
 		}
+
+		super.setupAnim(state);
 	}
 	
-	private void scratchingLeft(DoggoEntity doggoEntity) {
+	private void scratchingLeft(DoggoRenderState state) {
 		this.head.setPos(4.0F, 14F, -3.8F);
 		this.head.yRot = DEGREES_10;
-		this.head.xRot = -DEGREES_10 * (4f + Mth.sin(doggoEntity.getAnimationTick() * 2f) * 0.1f);
-		this.head.zRot = DEGREES_10 * (5f + Mth.sin(doggoEntity.getAnimationTick() * 2f) * 0.1f);
+		this.head.xRot = -DEGREES_10 * (4f + Mth.sin(state.animationTick * 2f) * 0.1f);
+		this.head.zRot = DEGREES_10 * (5f + Mth.sin(state.animationTick * 2f) * 0.1f);
 		this.neck.setPos(-0.6F, 16.5F, -1.8F);
 		this.neck.xRot = DEGREES_50;
 		this.neck.yRot = -DEGREES_10;
@@ -43,17 +45,17 @@ public class DoggoModelScratching extends DoggoEntityModel<DoggoEntity> {
 
 		this.leftHindLeg.setPos(1.1F, 22F, 1.6F);
 		this.leftHindLeg.yRot = -DEGREES_50;
-		this.leftHindLeg.xRot = Mth.cos(doggoEntity.getAnimationTick() * 2.5f) * 0.15f - DEGREES_130;
+		this.leftHindLeg.xRot = Mth.cos(state.animationTick * 2.5f) * 0.15f - DEGREES_130;
 		this.rightHindLeg.setPos(-2.5F, 22.7F, 2.0F);
 		this.rightHindLeg.yRot = -DEGREES_10;
 		this.rightHindLeg.xRot = DEGREES_270;
 	}
 	
-	private void scratchingRight(DoggoEntity doggoWolf) {
+	private void scratchingRight(DoggoRenderState state) {
 		this.head.setPos(-5.0F, 15F, -4.5F);
 		this.head.yRot = -DEGREES_20;
-		this.head.xRot = -DEGREES_10 * (4f + Mth.sin(doggoWolf.getAnimationTick() * 2f) * 0.1f);
-		this.head.zRot = -DEGREES_10 * (5f + Mth.sin(doggoWolf.getAnimationTick() * 2f) * 0.1f);
+		this.head.xRot = -DEGREES_10 * (4f + Mth.sin(state.animationTick * 2f) * 0.1f);
+		this.head.zRot = -DEGREES_10 * (5f + Mth.sin(state.animationTick * 2f) * 0.1f);
 		this.neck.setPos(-1.4F, 17.0F, -1.4F);
 		this.neck.xRot = DEGREES_50;
 		this.neck.yRot = DEGREES_10;
@@ -76,6 +78,6 @@ public class DoggoModelScratching extends DoggoEntityModel<DoggoEntity> {
 		this.leftHindLeg.xRot = DEGREES_270;
 		this.rightHindLeg.setPos(-2.5F, 22.4F, 1.8F);
 		this.rightHindLeg.yRot = DEGREES_50;
-		this.rightHindLeg.xRot = Mth.cos(doggoWolf.getAnimationTick() * 2.5f) * 0.15f - DEGREES_130;
+		this.rightHindLeg.xRot = Mth.cos(state.animationTick * 2.5f) * 0.15f - DEGREES_130;
 	}
 }

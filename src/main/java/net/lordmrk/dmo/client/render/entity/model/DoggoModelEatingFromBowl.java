@@ -1,17 +1,20 @@
 package net.lordmrk.dmo.client.render.entity.model;
 
-import net.lordmrk.dmo.entity.DoggoEntity;
+import net.lordmrk.dmo.client.render.entity.DoggoRenderState;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.util.Mth;
 
-public class DoggoModelEatingFromBowl extends DoggoEntityModel<DoggoEntity> {
+public class DoggoModelEatingFromBowl extends DoggoEntityModel {
 	
 	public DoggoModelEatingFromBowl(ModelPart root) {
 		super(root);
 	}
 
 	@Override
-	public void prepareMobModel(DoggoEntity doggoEntity, float f, float g, float h) {
+	public void setupAnim(DoggoRenderState state) {
+		float f = state.walkAnimationPos;
+		float g = state.walkAnimationSpeed;
+
 		this.head.setPos(-1.0F, 13.5F, -7.0F);
 		this.torso.xRot = DEGREES_90;
 		this.neck.setPos(-1.0F, 14.0F, -3.0F);
@@ -32,5 +35,7 @@ public class DoggoModelEatingFromBowl extends DoggoEntityModel<DoggoEntity> {
 		this.leftHindLeg.yRot = 0f;
 		this.rightFrontLeg.yRot = 0f;
 		this.leftFrontLeg.yRot = 0f;
+
+		super.setupAnim(state);
 	}
 }

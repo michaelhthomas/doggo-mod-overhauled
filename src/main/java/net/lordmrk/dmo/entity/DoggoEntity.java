@@ -349,6 +349,10 @@ public class DoggoEntity extends TamableAnimal implements NeutralMob {
         return Mth.sin(g * 3.1415927F) * Mth.sin(g * 3.1415927F * 11.0F) * 0.15F * 3.1415927F;
     }
 
+    public float getShakeProgress(float tickDelta) {
+        return Mth.lerp(tickDelta, this.lastShakeProgress, this.shakeProgress);
+    }
+
     protected float getSoundVolume() {
         return 0.4F;
     }

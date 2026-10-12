@@ -1,24 +1,26 @@
 package net.lordmrk.dmo.client.render.entity.model;
 
-import net.lordmrk.dmo.entity.DoggoEntity;
+import net.lordmrk.dmo.client.render.entity.DoggoRenderState;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.util.Mth;
 
-public class DoggoModelListening extends DoggoEntityModel<DoggoEntity> {
+public class DoggoModelListening extends DoggoEntityModel {
 
     public DoggoModelListening(ModelPart root) {
         super(root);
     }
 
     @Override
-    public void prepareMobModel(DoggoEntity doggoEntity, float f, float g, float h) {
-        float anim = (float) (-(1 / (1 + Math.pow(2.7182818F, -(Mth.sin(doggoEntity.getAnimationTick() / 8f) * 64f))) * 1.4f - 0.7f));
+    public void setupAnim(DoggoRenderState state) {
+        float anim = (float) (-(1 / (1 + Math.pow(2.7182818F, -(Mth.sin(state.animationTick / 8f) * 64f))) * 1.4f - 0.7f));
 
-        if(doggoEntity.isInSittingPose()) {
+        if(state.inSittingPose) {
             sitting(anim);
         } else {
-            standing(anim, f, g);
+            standing(anim, state.walkAnimationPos, state.walkAnimationSpeed);
         }
+
+        super.setupAnim(state);
     }
 
     private void standing(float anim, float f, float g) {

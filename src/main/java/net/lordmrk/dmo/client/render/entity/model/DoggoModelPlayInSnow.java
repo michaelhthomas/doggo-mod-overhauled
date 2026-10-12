@@ -1,22 +1,23 @@
 package net.lordmrk.dmo.client.render.entity.model;
 
-import net.lordmrk.dmo.entity.DoggoEntity;
+import net.lordmrk.dmo.client.render.entity.DoggoRenderState;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.util.Mth;
 
-public class DoggoModelPlayInSnow extends DoggoEntityModel<DoggoEntity> {
+public class DoggoModelPlayInSnow extends DoggoEntityModel {
 
     public DoggoModelPlayInSnow(ModelPart root) {
         super(root);
     }
 
     @Override
-    public void prepareMobModel(DoggoEntity doggoEntity, float f, float g, float h) {
-        playTime(doggoEntity);
+    public void setupAnim(DoggoRenderState state) {
+        playTime(state);
+        super.setupAnim(state);
     }
 
-    private void playTime(DoggoEntity doggoEntity) {
-        int animation = doggoEntity.getAnimation() % 45;
+    private void playTime(DoggoRenderState state) {
+        int animation = state.animation % 45;
         float anim;
         float animHead = 0;
 

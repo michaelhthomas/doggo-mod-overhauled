@@ -1,10 +1,8 @@
 package net.lordmrk.dmo.client.render.entity.model;
 
-import com.google.common.collect.ImmutableList;
-
 import net.lordmrk.dmo.DoggoAction;
-import net.lordmrk.dmo.entity.DoggoEntity;
-import net.minecraft.client.model.ColorableAgeableListModel;
+import net.lordmrk.dmo.client.render.entity.DoggoRenderState;
+import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartNames;
 import net.minecraft.client.model.geom.PartPose;
@@ -14,7 +12,7 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 
-public class DoggoEntityModel<T extends DoggoEntity> extends ColorableAgeableListModel<T> {
+public class DoggoEntityModel extends EntityModel<DoggoRenderState> {
 
 	/**
 	 * The key of the real head model part, whose value is {@value}.
@@ -93,6 +91,7 @@ public class DoggoEntityModel<T extends DoggoEntity> extends ColorableAgeableLis
 	protected static final float DEGREES_333 = DEGREES_1 * 333;
 
 	public DoggoEntityModel(ModelPart root) {
+		super(root);
 		this.head = root.getChild(PartNames.HEAD);
 	    this.realHead = this.head.getChild(REAL_HEAD);
 		this.mouth = this.realHead.getChild("doggo_mouth");
@@ -133,55 +132,50 @@ public class DoggoEntityModel<T extends DoggoEntity> extends ColorableAgeableLis
 		return LayerDefinition.create(modelData, 64, 32);
 	}
 
-	protected Iterable<ModelPart> headParts() {
-		return ImmutableList.of(this.head);
-	}
-
-	protected Iterable<ModelPart> bodyParts() {
-		return ImmutableList.of(this.torso, this.rightHindLeg, this.leftHindLeg, this.rightFrontLeg, this.leftFrontLeg, this.tail, this.neck);
-	}
-
-	public void setupAnim(T doggoEntity, float f, float g, float h, float i, float j) {
-		switch(doggoEntity.getAction()) {
+	@Override
+	public void setupAnim(DoggoRenderState state) {
+		switch(state.action) {
 		case NAPPING:
 			return;
 		case EATING_FROM_BOWL:
 			this.head.xRot = 0.69813170f;
-			this.head.yRot = i * 0.017453292F;
+			this.head.yRot = state.yRot * 0.017453292F;
 			break;
 		case EATING:
 		case NEUTRAL:
 		case PLAY_TIME:
-			this.head.xRot = j * 0.017453292F;
-			this.head.yRot = i * 0.017453292F;
+			this.head.xRot = state.xRot * 0.017453292F;
+			this.head.yRot = state.yRot * 0.017453292F;
 		default:
 			break;
 		}
 
-		tail(doggoEntity, h);
-		setMouth(doggoEntity);
+		tail(state);
+		setMouth(state);
 	}
 
-	private void setMouth(T doggoEntity) {
-		if(doggoEntity.hasMouthOpened() || doggoEntity.hasStackInMouth()) {
+	private void setMouth(DoggoRenderState state) {
+		if(state.hasMouthOpened || state.hasStackInMouth) {
 			this.mouth.xRot = 0.17453292f;
 		} else {
 			this.mouth.xRot = 0f;
 		}
 	}
 	
-	private void tail(DoggoEntity doggoEntity, float h) {
-		if(!doggoEntity.isInSittingPose() && !doggoEntity.isAction(DoggoAction.LISTENING) && !doggoEntity.isAction(DoggoAction.SCRATCHING)) {
+	private void tail(DoggoRenderState state) {
+		float h = state.tailAngle;
+
+		if(!state.inSittingPose && state.action != DoggoAction.LISTENING && state.action != DoggoAction.SCRATCHING) {
 			h += (this.torso.xRot - 1.57079632f);
 		}
 
-		switch(doggoEntity.getFeeling()) {
+		switch(state.feeling) {
 		case NEUTRAL:
 			this.tail.yRot = 0f;
 			this.tail.xRot = h;
 			return;
 		case HAPPY:
-			this.tail.yRot = Mth.cos(doggoEntity.getAnimationTick()) * 0.4f;
+			this.tail.yRot = Mth.cos(state.animationTick) * 0.4f;
 			this.tail.xRot = h;
 			return;
 		case SAD:

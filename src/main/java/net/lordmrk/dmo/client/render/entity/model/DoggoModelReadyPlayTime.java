@@ -1,17 +1,18 @@
 package net.lordmrk.dmo.client.render.entity.model;
 
-import net.lordmrk.dmo.entity.DoggoEntity;
+import net.lordmrk.dmo.client.render.entity.DoggoRenderState;
 import net.minecraft.client.model.geom.ModelPart;
 
-public class DoggoModelReadyPlayTime extends DoggoEntityModel<DoggoEntity> {
+public class DoggoModelReadyPlayTime extends DoggoEntityModel {
 
     public DoggoModelReadyPlayTime(ModelPart root) {
         super(root);
     }
 
     @Override
-    public void prepareMobModel(DoggoEntity doggoEntity, float f, float g, float h) {
+    public void setupAnim(DoggoRenderState state) {
         playTime();
+        super.setupAnim(state);
     }
 
     private void playTime() {
