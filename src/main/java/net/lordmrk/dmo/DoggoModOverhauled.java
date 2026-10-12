@@ -1,11 +1,11 @@
 package net.lordmrk.dmo;
 
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityDataRegistry;
 import net.lordmrk.dmo.block.entity.DogBowlEntity;
 import net.lordmrk.dmo.screen.DogBowlScreenHandler;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.MenuType;
@@ -46,8 +46,8 @@ public class DoggoModOverhauled implements ModInitializer {
 				DOG_BOWL,
 				new BlockEntityType<>(DogBowlEntity::new, Set.<Block>of(DoggoBlocks.getDogBowls())));
 
-		EntityDataSerializers.registerSerializer(TrackedDoggoData.DOGGO_ACTION);
-		EntityDataSerializers.registerSerializer(TrackedDoggoData.DOGGO_FEELING);
+		FabricEntityDataRegistry.register(Identifier.fromNamespaceAndPath(MODID, "doggo_action"), TrackedDoggoData.DOGGO_ACTION);
+		FabricEntityDataRegistry.register(Identifier.fromNamespaceAndPath(MODID, "doggo_feeling"), TrackedDoggoData.DOGGO_FEELING);
 	}
 
 	static {
