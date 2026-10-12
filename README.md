@@ -7,7 +7,7 @@ It is a complete rewrite of the mod [Doggo Mod](https://www.curseforge.com/minec
 
 ## **Blocks and items**
 This mod adds:
-- 176 different dog beds (16 colors * 11 wood types)
+- 208 different dog beds (16 colors * 13 wood types)
 - 16 differently colored dog bowls
 - 4 differently colored tennis balls
 
@@ -96,6 +96,8 @@ You can also recolor the tennis ball.
 ![Imgur](https://imgur.com/opmyVzj.jpg)
 
 ## **Requirements**
+- Minecraft 26.3
+- Java 25
 - [Fabric](https://fabricmc.net/use/ "Fabric")
 - [Fabric API](https://modrinth.com/mod/fabric-api)
 
