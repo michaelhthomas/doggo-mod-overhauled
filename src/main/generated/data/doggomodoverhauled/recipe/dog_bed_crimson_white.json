@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "P": "minecraft:crimson_slab",
+    "W": "minecraft:white_wool"
+  },
+  "pattern": [
+    "WW",
+    "PP"
+  ],
+  "result": {
+    "id": "doggomodoverhauled:dog_bed_crimson_white"
+  }
+}

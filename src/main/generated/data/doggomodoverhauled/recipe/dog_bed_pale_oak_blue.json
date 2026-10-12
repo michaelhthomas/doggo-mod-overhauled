@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "P": "minecraft:pale_oak_slab",
+    "W": "minecraft:blue_wool"
+  },
+  "pattern": [
+    "WW",
+    "PP"
+  ],
+  "result": {
+    "id": "doggomodoverhauled:dog_bed_pale_oak_blue"
+  }
+}

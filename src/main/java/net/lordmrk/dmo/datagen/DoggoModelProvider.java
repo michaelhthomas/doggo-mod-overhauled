@@ -1,37 +1,39 @@
 package net.lordmrk.dmo.datagen;
 
-import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
-import net.fabricmc.fabric.api.datagen.v1.provider.FabricModelProvider;
+import net.fabricmc.fabric.api.client.datagen.v1.provider.FabricModelProvider;
+import net.fabricmc.fabric.api.datagen.v1.FabricPackOutput;
 import net.lordmrk.dmo.DoggoBlocks;
 import net.lordmrk.dmo.DoggoItems;
 import net.lordmrk.dmo.DoggoModOverhauled;
 import net.lordmrk.dmo.block.DogBed;
 import net.lordmrk.dmo.block.DogBowl;
+import net.minecraft.client.data.models.BlockModelGenerators;
+import net.minecraft.client.data.models.ItemModelGenerators;
+import net.minecraft.client.data.models.MultiVariant;
+import net.minecraft.client.data.models.blockstates.MultiVariantGenerator;
+import net.minecraft.client.data.models.blockstates.PropertyDispatch;
+import net.minecraft.client.data.models.model.ItemModelUtils;
+import net.minecraft.client.data.models.model.ModelTemplate;
+import net.minecraft.client.data.models.model.TextureMapping;
+import net.minecraft.client.data.models.model.TextureSlot;
+import net.minecraft.client.renderer.block.dispatch.Variant;
+import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.core.Direction;
-import net.minecraft.data.models.BlockModelGenerators;
-import net.minecraft.data.models.ItemModelGenerators;
-import net.minecraft.data.models.blockstates.MultiVariantGenerator;
-import net.minecraft.data.models.blockstates.PropertyDispatch;
-import net.minecraft.data.models.blockstates.Variant;
-import net.minecraft.data.models.blockstates.VariantProperties;
-import net.minecraft.data.models.model.ModelLocationUtils;
-import net.minecraft.data.models.model.ModelTemplate;
-import net.minecraft.data.models.model.ModelTemplates;
-import net.minecraft.data.models.model.TextureMapping;
-import net.minecraft.data.models.model.TextureSlot;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.random.WeightedList;
 import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import java.util.AbstractMap;
 import java.util.Optional;
 
 /**
- * Generates blockstates and the per-variant block/item models for dog beds and dog bowls,
- * plus the tennis ball item models.
+ * Generates blockstates and the per-variant block models for dog beds and dog bowls, plus the
+ * item model definitions and tennis ball item models.
  *
- * <p>The base models are hand-authored Blockbench files in {@code src/main/resources};
- * this provider only generates the coloured/wooded variants that reference them.</p>
+ * <p>The base models are hand-authored Blockbench files in {@code src/main/resources}; this
+ * provider only generates the coloured/wooded variants that reference them.</p>
  */
 public class DoggoModelProvider extends FabricModelProvider {
 
@@ -42,7 +44,7 @@ public class DoggoModelProvider extends FabricModelProvider {
             DyeColor.RED, DyeColor.YELLOW, DyeColor.LIME, DyeColor.LIGHT_BLUE
     };
 
-    public DoggoModelProvider(FabricDataOutput output) {
+    public DoggoModelProvider(FabricPackOutput output) {
         super(output);
     }
 
@@ -51,85 +53,70 @@ public class DoggoModelProvider extends FabricModelProvider {
         for (AbstractMap.SimpleEntry<String, Block> entry : DoggoBlocks.BED_LIST) {
             DogBed bed = (DogBed) entry.getValue();
             String wood = bed.getWoodType().name();
-            DyeColor color = bed.getColor();
-
-            Identifier planks = Identifier.withDefaultNamespace("block/" + wood + "_planks");
-            Identifier wool = Identifier.withDefaultNamespace("block/" + color.getName() + "_wool");
+            String color = bed.getColor().getName();
 
             TextureMapping textures = new TextureMapping()
-                    .put(BORDER, planks)
-                    .put(BED, wool)
-                    .put(TextureSlot.PARTICLE, planks);
+                    .put(BORDER, blockTexture(wood + "_planks"))
+                    .put(BED, blockTexture(color + "_wool"))
+                    .put(TextureSlot.PARTICLE, blockTexture(wood + "_planks"));
 
-            ModelTemplate model = new ModelTemplate(Optional.of(modLoc("block/dog_bed")), Optional.empty(), BORDER, BED, TextureSlot.PARTICLE);
-            Identifier modelId = model.create(modLoc("block/" + entry.getKey()), textures, generator.modelOutput);
+            ModelTemplate template = new ModelTemplate(Optional.of(modLoc("block/dog_bed")), Optional.empty(), BORDER, BED, TextureSlot.PARTICLE);
+            Identifier model = template.create(bed, textures, generator.modelOutput);
 
-            generator.blockStateOutput.accept(createBedBlockState(bed, modelId));
+            MultiVariant plain = plainVariant(model);
+            generator.blockStateOutput.accept(MultiVariantGenerator.dispatch(bed)
+                    .with(PropertyDispatch.initial(BlockStateProperties.HORIZONTAL_FACING)
+                            .select(Direction.NORTH, plain)
+                            .select(Direction.EAST, plain.with(BlockModelGenerators.Y_ROT_90).with(BlockModelGenerators.UV_LOCK))
+                            .select(Direction.SOUTH, plain.with(BlockModelGenerators.Y_ROT_180).with(BlockModelGenerators.UV_LOCK))
+                            .select(Direction.WEST, plain.with(BlockModelGenerators.Y_ROT_270).with(BlockModelGenerators.UV_LOCK))));
+
+            generator.itemModelOutput.accept(bed.asItem(), ItemModelUtils.plainModel(model));
         }
 
         for (AbstractMap.SimpleEntry<String, Block> entry : DoggoBlocks.BOWL_LIST) {
             DogBowl bowl = (DogBowl) entry.getValue();
-            DyeColor color = bowl.getColor();
-
-            Identifier concrete = Identifier.withDefaultNamespace("block/" + color.getName() + "_concrete");
+            String color = bowl.getColor().getName();
             // The light gray bowl deliberately uses a gray bottom so it contrasts with its light gray side.
-            Identifier bottom = color == DyeColor.LIGHT_GRAY
-                    ? Identifier.withDefaultNamespace("block/gray_concrete")
-                    : Identifier.withDefaultNamespace("block/light_gray_concrete");
+            String bottom = bowl.getColor() == DyeColor.LIGHT_GRAY ? "gray_concrete" : "light_gray_concrete";
 
             TextureMapping textures = new TextureMapping()
-                    .put(TextureSlot.BOTTOM, bottom)
-                    .put(TextureSlot.SIDE, concrete)
-                    .put(TextureSlot.PARTICLE, bottom);
+                    .put(TextureSlot.BOTTOM, blockTexture(bottom))
+                    .put(TextureSlot.SIDE, blockTexture(color + "_concrete"))
+                    .put(TextureSlot.PARTICLE, blockTexture(bottom));
 
-            ModelTemplate model = new ModelTemplate(Optional.of(modLoc("block/dog_bowl")), Optional.empty(), TextureSlot.BOTTOM, TextureSlot.SIDE, TextureSlot.PARTICLE);
-            Identifier modelId = model.create(modLoc("block/" + entry.getKey()), textures, generator.modelOutput);
+            ModelTemplate template = new ModelTemplate(Optional.of(modLoc("block/dog_bowl")), Optional.empty(), TextureSlot.BOTTOM, TextureSlot.SIDE, TextureSlot.PARTICLE);
+            Identifier model = template.create(bowl, textures, generator.modelOutput);
 
-            generator.blockStateOutput.accept(MultiVariantGenerator.multiVariant(bowl,
-                    Variant.variant().with(VariantProperties.MODEL, modelId)));
+            generator.blockStateOutput.accept(MultiVariantGenerator.dispatch(bowl, plainVariant(model)));
+            generator.itemModelOutput.accept(bowl.asItem(), ItemModelUtils.plainModel(model));
         }
-    }
-
-    private static MultiVariantGenerator createBedBlockState(Block bed, Identifier modelId) {
-        PropertyDispatch.C1<Direction> variants = PropertyDispatch.property(BlockStateProperties.HORIZONTAL_FACING)
-                .select(Direction.EAST, rotated(modelId, VariantProperties.Rotation.R90))
-                .select(Direction.NORTH, Variant.variant().with(VariantProperties.MODEL, modelId))
-                .select(Direction.SOUTH, rotated(modelId, VariantProperties.Rotation.R180))
-                .select(Direction.WEST, rotated(modelId, VariantProperties.Rotation.R270));
-
-        return MultiVariantGenerator.multiVariant(bed).with(variants);
-    }
-
-    private static Variant rotated(Identifier modelId, VariantProperties.Rotation rotation) {
-        return Variant.variant()
-                .with(VariantProperties.MODEL, modelId)
-                .with(VariantProperties.Y_ROT, rotation)
-                .with(VariantProperties.UV_LOCK, true);
     }
 
     @Override
     public void generateItemModels(ItemModelGenerators generator) {
-        for (AbstractMap.SimpleEntry<String, Block> entry : DoggoBlocks.BED_LIST) {
-            generator.generateFlatItem(entry.getValue().asItem(), parentModel(modLoc("block/" + entry.getKey())));
-        }
-
-        for (AbstractMap.SimpleEntry<String, Block> entry : DoggoBlocks.BOWL_LIST) {
-            generator.generateFlatItem(entry.getValue().asItem(), parentModel(modLoc("block/" + entry.getKey())));
-        }
-
         for (DyeColor color : TENNIS_BALL_COLORS) {
-            generator.generateFlatItem(DoggoItems.getTennisBall(color), ModelTemplates.FLAT_ITEM);
+            createTennisBallModel(generator, DoggoItems.getTennisBall(color), color.getName());
         }
 
         // Legacy tennis ball uses the lime texture.
-        ModelTemplate legacy = new ModelTemplate(Optional.of(Identifier.withDefaultNamespace("item/generated")), Optional.empty(), TextureSlot.LAYER0);
-        legacy.create(ModelLocationUtils.getModelLocation(DoggoItems.TENNIS_BALL_LEGACY),
-                TextureMapping.singleSlot(TextureSlot.LAYER0, modLoc("item/tennis_ball_lime")),
-                generator.output);
+        createTennisBallModel(generator, DoggoItems.TENNIS_BALL_LEGACY, DyeColor.LIME.getName());
     }
 
-    private static ModelTemplate parentModel(Identifier parent) {
-        return new ModelTemplate(Optional.of(parent), Optional.empty());
+    private static void createTennisBallModel(ItemModelGenerators generator, Item item, String textureColor) {
+        ModelTemplate template = new ModelTemplate(Optional.of(Identifier.withDefaultNamespace("item/generated")), Optional.empty(), TextureSlot.LAYER0);
+        TextureMapping textures = TextureMapping.singleSlot(TextureSlot.LAYER0, new Material(modLoc("item/tennis_ball_" + textureColor)));
+        Identifier model = template.create(item, textures, generator.modelOutput);
+
+        generator.itemModelOutput.accept(item, ItemModelUtils.plainModel(model));
+    }
+
+    private static MultiVariant plainVariant(Identifier model) {
+        return new MultiVariant(WeightedList.of(new Variant(model)));
+    }
+
+    private static Material blockTexture(String name) {
+        return new Material(Identifier.withDefaultNamespace("block/" + name));
     }
 
     private static Identifier modLoc(String path) {

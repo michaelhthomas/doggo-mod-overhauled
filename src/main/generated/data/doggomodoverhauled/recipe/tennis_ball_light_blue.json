@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "D": "minecraft:light_blue_dye",
+    "S": "minecraft:string"
+  },
+  "pattern": [
+    "SSS",
+    "SDS",
+    "SSS"
+  ],
+  "result": {
+    "id": "doggomodoverhauled:tennis_ball_light_blue"
+  }
+}

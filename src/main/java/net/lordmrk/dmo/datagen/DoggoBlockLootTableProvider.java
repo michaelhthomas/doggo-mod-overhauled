@@ -1,18 +1,20 @@
 package net.lordmrk.dmo.datagen;
 
-import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
-import net.fabricmc.fabric.api.datagen.v1.provider.FabricBlockLootTableProvider;
+import net.fabricmc.fabric.api.datagen.v1.FabricPackOutput;
+import net.fabricmc.fabric.api.datagen.v1.provider.FabricBlockLootSubProvider;
 import net.lordmrk.dmo.DoggoBlocks;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.world.level.block.Block;
 import java.util.AbstractMap;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Generates the self-drop block loot tables for every dog bed and dog bowl.
  */
-public class DoggoBlockLootTableProvider extends FabricBlockLootTableProvider {
+public class DoggoBlockLootTableProvider extends FabricBlockLootSubProvider {
 
-    public DoggoBlockLootTableProvider(FabricDataOutput output) {
-        super(output);
+    public DoggoBlockLootTableProvider(FabricPackOutput output, CompletableFuture<HolderLookup.Provider> registriesFuture) {
+        super(output, registriesFuture);
     }
 
     @Override

@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "doggomodoverhauled:tennis_ball"
+  ],
+  "result": {
+    "id": "doggomodoverhauled:tennis_ball_lime"
+  }
+}

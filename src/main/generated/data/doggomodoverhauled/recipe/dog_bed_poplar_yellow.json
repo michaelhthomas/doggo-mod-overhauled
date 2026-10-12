@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "P": "minecraft:poplar_slab",
+    "W": "minecraft:yellow_wool"
+  },
+  "pattern": [
+    "WW",
+    "PP"
+  ],
+  "result": {
+    "id": "doggomodoverhauled:dog_bed_poplar_yellow"
+  }
+}

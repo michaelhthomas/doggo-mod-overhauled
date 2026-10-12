@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "P": "minecraft:jungle_slab",
+    "W": "minecraft:blue_wool"
+  },
+  "pattern": [
+    "WW",
+    "PP"
+  ],
+  "result": {
+    "id": "doggomodoverhauled:dog_bed_jungle_blue"
+  }
+}
