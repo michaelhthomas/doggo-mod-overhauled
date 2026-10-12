@@ -5,6 +5,7 @@ import java.util.EnumSet;
 import net.lordmrk.dmo.DoggoAction;
 import net.lordmrk.dmo.DoggoFeeling;
 import net.lordmrk.dmo.entity.DoggoEntity;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -26,7 +27,7 @@ public class DoggoEatGoal extends Goal {
 
 	@Override
 	public boolean canUse() {
-		if(this.doggoEntity.isInWaterOrBubble()) {
+		if(this.doggoEntity.isInWater()) {
 			return false;
 		} else if(!this.doggoEntity.onGround()) {
 			return false;
@@ -44,7 +45,7 @@ public class DoggoEatGoal extends Goal {
 
 	@Override
 	public void start() {
-		eating = doggoEntity.getStackInMouth().getItem().getFoodProperties().getNutrition() * 4;
+		eating = doggoEntity.getStackInMouth().get(DataComponents.FOOD).nutrition() * 4;
 		
 		if(doggoEntity.isOrderedToSit()) {
 			doggoEntity.setInSittingPose(true);

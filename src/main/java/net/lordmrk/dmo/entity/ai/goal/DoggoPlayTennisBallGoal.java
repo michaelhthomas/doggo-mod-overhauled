@@ -44,7 +44,7 @@ public class DoggoPlayTennisBallGoal extends Goal {
             return false;
         }
 
-        if(this.doggoEntity.isInWaterOrBubble()) {
+        if(this.doggoEntity.isInWater()) {
             return false;
         }
 
@@ -200,6 +200,6 @@ public class DoggoPlayTennisBallGoal extends Goal {
         this.doggoEntity.level().playSound(
                 null,
                 this.doggoEntity.getX(), this.doggoEntity.getY(), this.doggoEntity.getZ(),
-                SoundEvents.WOLF_WHINE, SoundSource.NEUTRAL, 0.4f, 1.05f);
+                this.doggoEntity.getWhineSound(), SoundSource.NEUTRAL, 0.4f, 1.05f);
     }
 }

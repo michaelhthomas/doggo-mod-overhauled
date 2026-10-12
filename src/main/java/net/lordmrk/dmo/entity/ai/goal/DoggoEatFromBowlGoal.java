@@ -38,7 +38,7 @@ public class DoggoEatFromBowlGoal extends Goal {
 	public boolean canUse() {
 		if(!this.doggoEntity.isTame()) {
 			return false;
-		} else if(this.doggoEntity.isInWaterOrBubble()) {
+		} else if(this.doggoEntity.isInWater()) {
 			return false;
 		} else if(!this.doggoEntity.onGround()) {
 			return false;
@@ -70,10 +70,7 @@ public class DoggoEatFromBowlGoal extends Goal {
 		this.failed = false;
 		this.eating = 0;
 		this.whineTime = 0;
-		this.bowlPos = BlockPos.findClosestMatch(
-				this.doggoEntity.blockPosition(),
-				16, 8,
-				(b) -> DogBowl.canEatFromBowl(b, doggoEntity));
+		this.bowlPos = findClosestBowl(this.doggoEntity.blockPosition(), 16, 8);
 		
 		try {
 			Vec3 closestSide = getClosestSide(new Vec3(bowlPos.get().getX(), bowlPos.get().getY(), bowlPos.get().getZ()));
@@ -155,10 +152,30 @@ public class DoggoEatFromBowlGoal extends Goal {
 		this.doggoEntity.level().playSound(
 				null,
 				this.doggoEntity.getX(), this.doggoEntity.getY(), this.doggoEntity.getZ(),
-				SoundEvents.WOLF_WHINE, SoundSource.NEUTRAL, 0.4f, 1.05f);
+				this.doggoEntity.getWhineSound(), SoundSource.NEUTRAL, 0.4f, 1.05f);
 		whineTime = 40;
 	}
 	
+	private Optional<BlockPos> findClosestBowl(BlockPos origin, int horizontal, int vertical) {
+		BlockPos min = origin.offset(-horizontal, -vertical, -horizontal);
+		BlockPos max = origin.offset(horizontal, vertical, horizontal);
+		BlockPos closest = null;
+		double closestDistance = Double.MAX_VALUE;
+
+		for (BlockPos pos : BlockPos.betweenClosed(min, max)) {
+			if (DogBowl.canEatFromBowl(pos, this.doggoEntity)) {
+				double distance = pos.distSqr(origin);
+
+				if (distance < closestDistance) {
+					closestDistance = distance;
+					closest = pos.immutable();
+				}
+			}
+		}
+
+		return Optional.ofNullable(closest);
+	}
+
 	private Vec3 getClosestSide(Vec3 position) {
 		Vec3[] sides = new Vec3[] {new Vec3(0.4, 0, 0), new Vec3(-0.4, 0, 0), new Vec3(0, 0, 0.4), new Vec3(0, 0, -0.4)};
 		

@@ -30,7 +30,7 @@ public class DoggoReadyPlayTimeGoal extends Goal {
             return false;
         }
 
-        if(this.doggoEntity.isInWaterOrBubble()) {
+        if(this.doggoEntity.isInWater()) {
             return false;
         }
 
@@ -81,7 +81,7 @@ public class DoggoReadyPlayTimeGoal extends Goal {
             return true;
         }
 
-        if(this.doggoEntity.isInWaterOrBubble()) {
+        if(this.doggoEntity.isInWater()) {
             return true;
         }
 

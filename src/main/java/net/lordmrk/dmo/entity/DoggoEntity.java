@@ -5,10 +5,10 @@ import net.lordmrk.dmo.*;
 import net.lordmrk.dmo.block.entity.DogBowlEntity;
 import net.lordmrk.dmo.entity.ai.goal.*;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -16,6 +16,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.*;
 import net.minecraft.util.valueproviders.UniformInt;
@@ -25,6 +26,8 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityReference;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -49,6 +52,9 @@ import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.ResetUniversalAngerTargetGoal;
 import net.minecraft.world.entity.animal.turtle.Turtle;
 import net.minecraft.world.entity.animal.wolf.Wolf;
+import net.minecraft.world.entity.animal.wolf.WolfSoundVariant;
+import net.minecraft.world.entity.animal.wolf.WolfSoundVariant.WolfSoundSet;
+import net.minecraft.world.entity.animal.wolf.WolfSoundVariants;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.entity.animal.equine.Llama;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -56,10 +62,11 @@ import net.minecraft.world.entity.monster.skeleton.AbstractSkeleton;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Ghast;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.DyeColor;
-import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -67,20 +74,21 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.pathfinder.PathType;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.function.Predicate;
 
 public class DoggoEntity extends TamableAnimal implements NeutralMob {
 
     private static final EntityDataAccessor<DoggoAction> ACTION;
     private static final EntityDataAccessor<Boolean> ACTION_TICKING;
-    private static final EntityDataAccessor<Integer> ANGER_TIME;
+    private static final EntityDataAccessor<Long> ANGER_END_TIME;
     private static final EntityDataAccessor<Boolean> BEGGING;
     private static final EntityDataAccessor<BlockPos> BOWL_POS;
     private static final EntityDataAccessor<Integer> COLLAR_COLOR;
@@ -91,6 +99,7 @@ public class DoggoEntity extends TamableAnimal implements NeutralMob {
     private static final EntityDataAccessor<Integer> SCRATCHING_SIDE;
 
     private static final Set<Block> DIGGABLE_BLOCKS = Sets.newHashSet(Blocks.GRASS_BLOCK, Blocks.DIRT, Blocks.SAND, Blocks.RED_SAND, Blocks.GRAVEL, Blocks.SNOW_BLOCK);
+    private static final WolfSoundVariant CLASSIC_WOLF_SOUNDS = SoundEvents.WOLF_SOUNDS.get(WolfSoundVariants.SoundSet.CLASSIC);
     private float begAnimationProgress;
     private float lastBegAnimationProgress;
     private boolean furWet;
@@ -99,7 +108,7 @@ public class DoggoEntity extends TamableAnimal implements NeutralMob {
     private float lastShakeProgress;
     private static final UniformInt ANGER_TIME_RANGE;
     @Nullable
-    private UUID angryAt;
+    private EntityReference<LivingEntity> persistentAngerTarget;
 
     public static final Predicate<ItemEntity> PICKABLE_DROP_FILTER;
     public static final Predicate<Entity> FOLLOWABLE_DROP_FILTER;
@@ -119,11 +128,11 @@ public class DoggoEntity extends TamableAnimal implements NeutralMob {
 
     public DoggoEntity(EntityType<? extends DoggoEntity> entityType, Level world) {
         super(entityType, world);
-        this.setTame(true);
+        this.setTame(true, false);
         this.setOrderedToSit(true);
         this.setInSittingPose(true);
         this.setPathfindingMalus(PathType.POWDER_SNOW, -1.0F);
-        this.setPathfindingMalus(PathType.DANGER_POWDER_SNOW, -1.0F);
+        this.setPathfindingMalus(PathType.ON_TOP_OF_POWDER_SNOW, -1.0F);
     }
 
     @Override
@@ -184,8 +193,9 @@ public class DoggoEntity extends TamableAnimal implements NeutralMob {
         return false;
     }
 
-    public boolean canBeLeashed(Player player) {
-        return !this.isAngry() && super.canBeLeashed(player);
+    @Override
+    public boolean canBeLeashed() {
+        return !this.isAngry() && super.canBeLeashed();
     }
 
     public boolean canStartDigging() {
@@ -194,7 +204,7 @@ public class DoggoEntity extends TamableAnimal implements NeutralMob {
 
     @Override
     public void startPersistentAngerTimer() {
-        this.setRemainingPersistentAngerTime(ANGER_TIME_RANGE.sample(this.random));
+        this.setTimeToRemainAngry(ANGER_TIME_RANGE.sample(this.random));
     }
 
     public static AttributeSupplier.Builder createDoggoAttributes() {
@@ -206,19 +216,20 @@ public class DoggoEntity extends TamableAnimal implements NeutralMob {
 
     @Override
     public AgeableMob getBreedOffspring(ServerLevel world, AgeableMob entity) {
-        DoggoEntity doggoEntity = DoggoEntities.DOGGO_ENTITY.create(world);
-        UUID uuid = this.getOwnerUUID();
+        DoggoEntity doggoEntity = DoggoEntities.DOGGO_ENTITY.create(world, EntitySpawnReason.BREEDING);
+        EntityReference<LivingEntity> owner = this.getOwnerReference();
 
-        if (uuid != null) {
-            doggoEntity.setOwnerUUID(uuid);
+        if (owner != null) {
+            doggoEntity.setOwnerReference(owner);
         }
 
         return doggoEntity;
     }
 
-    public boolean hurt(DamageSource source, float amount) {
+    @Override
+    public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
         dropStackInMouth();
-        return super.hurt(source, amount);
+        return super.hurtServer(level, source, amount);
     }
 
     public void dropStackInMouth() {
@@ -235,7 +246,7 @@ public class DoggoEntity extends TamableAnimal implements NeutralMob {
         }
 
         if (this.isAngry()) {
-            return SoundEvents.WOLF_GROWL;
+            return this.wolfSounds().growlSound().value();
         }
 
         if (this.random.nextInt(2) == 0) {
@@ -244,16 +255,16 @@ public class DoggoEntity extends TamableAnimal implements NeutralMob {
 
         if (this.isTame() && this.random.nextInt(3) == 0) {
             if(this.getHealth() < 10.0F) {
-                return SoundEvents.WOLF_WHINE;
+                return this.wolfSounds().whineSound().value();
             }
 
-            if(!this.hasStackInMouth() && !this.level().isClientSide) {
+            if(!this.hasStackInMouth() && !this.level().isClientSide()) {
                 this.setMouthOpened(true);
-                return SoundEvents.WOLF_PANT;
+                return this.wolfSounds().pantSound().value();
             }
         }
 
-        return SoundEvents.WOLF_AMBIENT;
+        return this.wolfSounds().ambientSound().value();
     }
 
     public int getAnimation() {
@@ -269,14 +280,14 @@ public class DoggoEntity extends TamableAnimal implements NeutralMob {
     }
 
     @Override
-    public int getRemainingPersistentAngerTime() {
-        return this.entityData.get(ANGER_TIME);
+    public long getPersistentAngerEndTime() {
+        return this.entityData.get(ANGER_END_TIME);
     }
 
     @Nullable
     @Override
-    public UUID getPersistentAngerTarget() {
-        return this.angryAt;
+    public EntityReference<LivingEntity> getPersistentAngerTarget() {
+        return this.persistentAngerTarget;
     }
 
     public float getBegAnimationProgress(float tickDelta) {
@@ -292,7 +303,7 @@ public class DoggoEntity extends TamableAnimal implements NeutralMob {
     }
 
     protected SoundEvent getDeathSound() {
-        return SoundEvents.WOLF_DEATH;
+        return this.wolfSounds().deathSound().value();
     }
 
     public DoggoFeeling getFeeling() {
@@ -308,7 +319,15 @@ public class DoggoEntity extends TamableAnimal implements NeutralMob {
     }
 
     protected SoundEvent getHurtSound(DamageSource source) {
-        return SoundEvents.WOLF_HURT;
+        return this.wolfSounds().hurtSound().value();
+    }
+
+    public SoundEvent getWhineSound() {
+        return this.wolfSounds().whineSound().value();
+    }
+
+    private WolfSoundSet wolfSounds() {
+        return this.isBaby() ? CLASSIC_WOLF_SOUNDS.babySounds() : CLASSIC_WOLF_SOUNDS.adultSounds();
     }
 
     public Vec3 getLeashOffset() {
@@ -389,7 +408,7 @@ public class DoggoEntity extends TamableAnimal implements NeutralMob {
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
         ItemStack itemStack = player.getItemInHand(hand);
 
-        if (this.level().isClientSide) {
+        if (this.level().isClientSide()) {
             boolean bl = this.isOwnedBy(player) || this.isTame() || itemStack.is(Items.BONE) && !this.isTame() && !this.isAngry();
             return bl ? InteractionResult.CONSUME : InteractionResult.PASS;
         }
@@ -423,13 +442,11 @@ public class DoggoEntity extends TamableAnimal implements NeutralMob {
     }
 
     private boolean interactMobCollar(Player player, ItemStack itemStackInHand) {
-        Item item = itemStackInHand.getItem();
+        DyeColor dyeColor = itemStackInHand.get(DataComponents.DYE);
 
-        if (!(item instanceof DyeItem)) {
+        if (dyeColor == null) {
             return false;
         }
-
-        DyeColor dyeColor = ((DyeItem)item).getDyeColor();
 
         if (dyeColor == this.getCollarColor()) {
             return false;
@@ -459,8 +476,6 @@ public class DoggoEntity extends TamableAnimal implements NeutralMob {
     }
 
     private boolean interactMobHealBreedingItem(Player player, ItemStack itemStackInHand) {
-        Item item = itemStackInHand.getItem();
-
         if (!isAction(DoggoAction.NEUTRAL)) {
             return false;
         }
@@ -477,7 +492,8 @@ public class DoggoEntity extends TamableAnimal implements NeutralMob {
             return false;
         }
 
-        this.heal((float)item.getFoodProperties().getNutrition());
+        FoodProperties food = itemStackInHand.get(DataComponents.FOOD);
+        this.heal((float)food.nutrition());
         PlayerUtils.decrementItemStackIfNotCreative(player, itemStackInHand);
 
         return true;
@@ -505,13 +521,13 @@ public class DoggoEntity extends TamableAnimal implements NeutralMob {
         this.setTarget(null);
     }
 
-    public boolean isBreedingItem(Item item) {
-        return item.isEdible() && item.getFoodProperties().isMeat();
+    public boolean isBreedingItem(ItemStack stack) {
+        return stack.get(DataComponents.FOOD) != null && stack.is(ItemTags.MEAT);
     }
 
     @Override
     public boolean isFood(ItemStack stack) {
-        return isBreedingItem(stack.getItem());
+        return isBreedingItem(stack);
     }
 
     public boolean isFurWet() {
@@ -519,19 +535,19 @@ public class DoggoEntity extends TamableAnimal implements NeutralMob {
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(ACTION, DoggoAction.NEUTRAL);
-        this.entityData.define(ACTION_TICKING, false);
-        this.entityData.define(ANGER_TIME, 0);
-        this.entityData.define(BEGGING, false);
-        this.entityData.define(BOWL_POS, new BlockPos(0, 0, 0));
-        this.entityData.define(COLLAR_COLOR, DyeColor.RED.getId());
-        this.entityData.define(FEELING, DoggoFeeling.NEUTRAL);
-        this.entityData.define(IN_LIE_DOWN_POSE, false);
-        this.entityData.define(MOUTH_OPENED, false);
-        this.entityData.define(MOUTH_STACK, new ItemStack(Items.AIR));
-        this.entityData.define(SCRATCHING_SIDE, 0);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(ACTION, DoggoAction.NEUTRAL);
+        builder.define(ACTION_TICKING, false);
+        builder.define(ANGER_END_TIME, -1L);
+        builder.define(BEGGING, false);
+        builder.define(BOWL_POS, new BlockPos(0, 0, 0));
+        builder.define(COLLAR_COLOR, DyeColor.RED.getId());
+        builder.define(FEELING, DoggoFeeling.NEUTRAL);
+        builder.define(IN_LIE_DOWN_POSE, false);
+        builder.define(MOUTH_OPENED, false);
+        builder.define(MOUTH_STACK, new ItemStack(Items.AIR));
+        builder.define(SCRATCHING_SIDE, 0);
     }
 
     @Override
@@ -556,7 +572,7 @@ public class DoggoEntity extends TamableAnimal implements NeutralMob {
         this.goalSelector.addGoal(4, new SitWhenOrderedToGoal(this));
         this.goalSelector.addGoal(5, new DoggoEatFromBowlGoal(this));
         this.goalSelector.addGoal(6, new MeleeAttackGoal(this, 1.0D, true));
-        this.goalSelector.addGoal(7, new FollowOwnerGoal(this, 1.0D, 10.0F, 2.0F, false));
+        this.goalSelector.addGoal(7, new FollowOwnerGoal(this, 1.0D, 10.0F, 2.0F));
         this.goalSelector.addGoal(8, new BreedGoal(this, 1.0D));
         this.goalSelector.addGoal(9, new DoggoBegGoal(this, 8.0F));
         this.goalSelector.addGoal(10, new DoggoPlayTennisBallGoal(this));
@@ -622,7 +638,7 @@ public class DoggoEntity extends TamableAnimal implements NeutralMob {
     }
 
     public boolean isStackInMouthMeat() {
-        return hasStackInMouth() && getStackInMouth().isEdible() && getStackInMouth().getItem().getFoodProperties().isMeat();
+        return hasStackInMouth() && getStackInMouth().get(DataComponents.FOOD) != null && getStackInMouth().is(ItemTags.MEAT);
     }
 
     public void die(DamageSource damageSource) {
@@ -634,16 +650,15 @@ public class DoggoEntity extends TamableAnimal implements NeutralMob {
     }
 
     protected void playStepSound(BlockPos pos, BlockState state) {
-        this.playSound(SoundEvents.WOLF_STEP, 0.15F, 1.0F);
+        this.playSound(SoundEvents.WOLF_STEP.value(), 0.15F, 1.0F);
     }
 
-    public void readAdditionalSaveData(CompoundTag nbt) {
-        super.readAdditionalSaveData(nbt);
-        if (nbt.contains("CollarColor", 99)) {
-            this.setCollarColor(DyeColor.byId(nbt.getInt("CollarColor")));
-        }
+    @Override
+    public void readAdditionalSaveData(ValueInput input) {
+        super.readAdditionalSaveData(input);
+        input.getInt("CollarColor").ifPresent(color -> this.setCollarColor(DyeColor.byId(color)));
 
-        this.readPersistentAngerSaveData(this.level(), nbt);
+        this.readPersistentAngerSaveData(this.level(), input);
     }
 
     private void resetShake() {
@@ -665,13 +680,13 @@ public class DoggoEntity extends TamableAnimal implements NeutralMob {
     }
 
     @Override
-    public void setRemainingPersistentAngerTime(int angerTime) {
-        this.entityData.set(ANGER_TIME, angerTime);
+    public void setPersistentAngerEndTime(long endTime) {
+        this.entityData.set(ANGER_END_TIME, endTime);
     }
 
     @Override
-    public void setPersistentAngerTarget(@Nullable UUID angryAt) {
-        this.angryAt = angryAt;
+    public void setPersistentAngerTarget(@Nullable EntityReference<LivingEntity> persistentAngerTarget) {
+        this.persistentAngerTarget = persistentAngerTarget;
     }
 
     public void setBegging(boolean begging) {
@@ -747,7 +762,7 @@ public class DoggoEntity extends TamableAnimal implements NeutralMob {
             return false;
         }
 
-        if(this.isInWaterOrBubble()) {
+        if(this.isInWater()) {
             return false;
         }
 
@@ -789,7 +804,7 @@ public class DoggoEntity extends TamableAnimal implements NeutralMob {
             return true;
         }
 
-        if(this.isInWaterOrBubble()) {
+        if(this.isInWater()) {
             return true;
         }
 
@@ -823,9 +838,9 @@ public class DoggoEntity extends TamableAnimal implements NeutralMob {
             }
 
             if(this.getAction() == DoggoAction.NEUTRAL) {
-                if (this.isInWaterRainOrBubble()) {
+                if (this.isInWaterOrRain()) {
                     this.furWet = true;
-                    if (this.canShakeWaterOff && !this.level().isClientSide) {
+                    if (this.canShakeWaterOff && !this.level().isClientSide()) {
                         this.level().broadcastEntityEvent(this, (byte)56);
                         this.resetShake();
                     }
@@ -858,14 +873,14 @@ public class DoggoEntity extends TamableAnimal implements NeutralMob {
                 }
             }
 
-            if (!this.level().isClientSide) {
+            if (!this.level().isClientSide()) {
                 for(DoggoGoalData data : this.goalDataMap.values()) {
                     data.tick();
                 }
             }
         }
 
-        if(this.level().isClientSide) {
+        if(this.level().isClientSide()) {
             if(isAction(DoggoAction.NEUTRAL)) {
                 animation = 0;
             } else {
@@ -886,14 +901,14 @@ public class DoggoEntity extends TamableAnimal implements NeutralMob {
                     this.level().addParticle(new BlockParticleOption(ParticleTypes.BLOCK, this.level().getBlockState(this.blockPosition().below())), this.getX() + x, this.getY(), this.getZ() + z, 0.1, 0.1, 0.1);
                     break;
                 case EATING:
-                    this.level().addParticle(new ItemParticleOption(ParticleTypes.ITEM, getStackInMouth()), this.getX() + x * (1.6 + ((double) this.random.nextInt(5) / 10)), this.getY() + 0.55, this.getZ() + z * (1.6 + ((double) this.random.nextInt(5) / 10)), 0, 0, 0);
+                    this.level().addParticle(new ItemParticleOption(ParticleTypes.ITEM, ItemStackTemplate.fromNonEmptyStack(getStackInMouth())), this.getX() + x * (1.6 + ((double) this.random.nextInt(5) / 10)), this.getY() + 0.55, this.getZ() + z * (1.6 + ((double) this.random.nextInt(5) / 10)), 0, 0, 0);
                     break;
                 case EATING_FROM_BOWL:
                     if(getBowlPos() != null && this.level().getBlockEntity(getBowlPos()) != null) {
                         ItemStack item = ((DogBowlEntity) this.level().getBlockEntity(getBowlPos())).getItem(0);
 
                         if(item != null && !item.isEmpty()) {
-                            this.level().addParticle(new ItemParticleOption(ParticleTypes.ITEM, item), getBowlPos().getX() + 0.4 + ((double) this.random.nextInt(3) / 10), getBowlPos().getY() + 0.2, getBowlPos().getZ() + 0.4 + ((double) this.random.nextInt(3) / 10), 0, 0, 0);
+                            this.level().addParticle(new ItemParticleOption(ParticleTypes.ITEM, ItemStackTemplate.fromNonEmptyStack(item)), getBowlPos().getX() + 0.4 + ((double) this.random.nextInt(3) / 10), getBowlPos().getY() + 0.2, getBowlPos().getZ() + 0.4 + ((double) this.random.nextInt(3) / 10), 0, 0, 0);
                         }
                     }
                     break;
@@ -952,29 +967,30 @@ public class DoggoEntity extends TamableAnimal implements NeutralMob {
     public void aiStep() {
         super.aiStep();
 
-        if (!this.level().isClientSide && this.furWet && !this.canShakeWaterOff && !this.isPathFinding() && this.onGround()) {
+        if (!this.level().isClientSide() && this.furWet && !this.canShakeWaterOff && !this.isPathFinding() && this.onGround()) {
             this.canShakeWaterOff = true;
             this.shakeProgress = 0.0F;
             this.lastShakeProgress = 0.0F;
             this.level().broadcastEntityEvent(this, (byte)8);
         }
 
-        if (!this.level().isClientSide) {
+        if (!this.level().isClientSide()) {
             this.updatePersistentAnger((ServerLevel)this.level(), true);
         }
 
     }
 
-    public void addAdditionalSaveData(CompoundTag nbt) {
-        super.addAdditionalSaveData(nbt);
-        nbt.putByte("CollarColor", (byte)this.getCollarColor().getId());
-        this.addPersistentAngerSaveData(nbt);
+    @Override
+    public void addAdditionalSaveData(ValueOutput output) {
+        super.addAdditionalSaveData(output);
+        output.putByte("CollarColor", (byte)this.getCollarColor().getId());
+        this.addPersistentAngerSaveData(output);
     }
 
     static {
         ACTION = SynchedEntityData.defineId(DoggoEntity.class, TrackedDoggoData.DOGGO_ACTION);
         ACTION_TICKING = SynchedEntityData.defineId(DoggoEntity.class, EntityDataSerializers.BOOLEAN);
-        ANGER_TIME = SynchedEntityData.defineId(DoggoEntity.class, EntityDataSerializers.INT);
+        ANGER_END_TIME = SynchedEntityData.defineId(DoggoEntity.class, EntityDataSerializers.LONG);
         BEGGING = SynchedEntityData.defineId(DoggoEntity.class, EntityDataSerializers.BOOLEAN);
         BOWL_POS = SynchedEntityData.defineId(DoggoEntity.class, EntityDataSerializers.BLOCK_POS);
         COLLAR_COLOR = SynchedEntityData.defineId(DoggoEntity.class, EntityDataSerializers.INT);

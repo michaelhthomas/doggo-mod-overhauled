@@ -18,14 +18,14 @@ public class DoggoNapGoal extends Goal {
 
 	@Override
 	public boolean canContinueToUse() {
-		return !this.doggoEntity.isInWaterOrBubble() && this.doggoEntity.onGround() && !this.doggoEntity.isOwnerClose();
+		return !this.doggoEntity.isInWater() && this.doggoEntity.onGround() && !this.doggoEntity.isOwnerClose();
 	}
 
 	@Override
 	public boolean canUse() {
 		if(!this.doggoEntity.isTame()) {
 			return false;
-		} else if(this.doggoEntity.isInWaterOrBubble()) {
+		} else if(this.doggoEntity.isInWater()) {
 			return false;
 		} else if(!this.doggoEntity.onGround()) {
 			return false;

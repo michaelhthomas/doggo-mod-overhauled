@@ -3,6 +3,7 @@ package net.lordmrk.dmo.entity.ai.goal;
 import java.util.EnumSet;
 
 import net.lordmrk.dmo.entity.DoggoEntity;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
@@ -32,8 +33,12 @@ public class DoggoBegGoal extends Goal {
 		if(this.doggoEntity.hasStackInMouth()) {
 			return false;
 		}
-		
-		this.begFrom = this.world.getNearestPlayer(this.validPlayerPredicate, this.doggoEntity);
+
+		if(!(this.world instanceof ServerLevel level)) {
+			return false;
+		}
+
+		this.begFrom = this.world.getNearestPlayer(this.doggoEntity.getX(), this.doggoEntity.getY(), this.doggoEntity.getZ(), this.begDistance, entity -> entity instanceof Player player && this.isAttractive(player) && this.validPlayerPredicate.test(level, player, this.doggoEntity));
 		return this.begFrom != null && this.isAttractive(this.begFrom);
 	}
 
