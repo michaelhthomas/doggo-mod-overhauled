@@ -28,6 +28,9 @@ public class DoggoRenderState extends HoldingEntityRenderState {
     public float tailAngle;
     public DyeColor collarColor;
     public Identifier texture;
+    public boolean sleeping;
+    public int faceTint = -1;
+    public int jawTint = -1;
 
     /** Lerped animation values, resolved with the frame's partial tick. */
     public float begAnimationProgress;

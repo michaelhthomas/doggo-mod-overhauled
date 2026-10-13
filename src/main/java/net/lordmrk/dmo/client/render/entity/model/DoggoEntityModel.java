@@ -10,7 +10,10 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
+
+import java.util.Set;
 
 public class DoggoEntityModel extends EntityModel<DoggoRenderState> {
 
@@ -111,19 +114,31 @@ public class DoggoEntityModel extends EntityModel<DoggoRenderState> {
 
 		// Head
 		PartDefinition modelPartData2 = modelPartData.addOrReplaceChild(PartNames.HEAD, CubeListBuilder.create(), PartPose.offset(-1.0F, 13.5F, -7.0F));
-		modelPartData2.addOrReplaceChild(REAL_HEAD, CubeListBuilder.create().texOffs(0, 0).addBox(-2.0F, -3.0F, -2.0F, 6.0F, 6.0F, 4.0F).texOffs(16, 14).addBox(-2.0F, -5.0F, 0.0F, 2.0F, 2.0F, 1.0F).texOffs(16, 14).addBox(2.0F, -5.0F, 0.0F, 2.0F, 2.0F, 1.0F).texOffs(0, 10).addBox(-0.5F, 0.0F, -5.0F, 3.0F, 2.0F, 4.0F), PartPose.ZERO)
-			.addOrReplaceChild("doggo_mouth", CubeListBuilder.create().texOffs(43, 14).addBox(-0.5F, 0.0F, -5.0F, 3.0F, 1.0F, 4.0F), PartPose.offset(0.0F, 2.0F, 0.0F));
+		modelPartData2.addOrReplaceChild(REAL_HEAD, CubeListBuilder.create().texOffs(0, 0).addBox(-2.0F, -3.0F, -2.0F, 6.0F, 6.0F, 4.0F).texOffs(16, 14).addBox(-2.0F, -5.0F, 0.0F, 2.0F, 2.0F, 1.0F).texOffs(16, 14).addBox(2.0F, -5.0F, 0.0F, 2.0F, 2.0F, 1.0F).texOffs(0, 10).addBox(-0.5F, -0.001F, -5.0F, 3.0F, 2.0F, 4.0F), PartPose.ZERO)
+		// The lower jaw. Box UV unwrapping sends a 1-tall box's underside and its side faces to
+		// different texture rows, so it takes two slabs to reproduce the vanilla wolf muzzle's bottom
+		// unit exactly from the wolf's own texture: the UP face samples the muzzle underside
+		// (texOffs 0,10 -> the wolf's u7..10 v10..14) and the side faces sample the lower lip row
+		// (texOffs 0,12 -> the wolf's v16). A third slab carries the mouth-interior overlay on the top
+		// face, which the upper muzzle hides while the mouth is closed. The offset parks the underside
+		// at the wolf muzzle's own y=2.999 so it does not z-fight the head's underside.
+			.addOrReplaceChild("doggo_mouth", CubeListBuilder.create()
+				.texOffs(0, 10).addBox(-0.5F, 0.0F, -5.0F, 3.0F, 1.0F, 4.0F, Set.of(Direction.UP))
+				.texOffs(0, 12).addBox(-0.5F, 0.0F, -5.0F, 3.0F, 1.0F, 4.0F, Set.of(Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST))
+				.texOffs(43, 14).addBox(-0.5F, 0.0F, -5.0F, 3.0F, 1.0F, 4.0F, Set.of(Direction.DOWN)),
+				PartPose.offset(0.0F, 1.999F, 0.0F));
 
 		// Body
 		modelPartData.addOrReplaceChild(PartNames.BODY, CubeListBuilder.create().texOffs(18, 14).addBox(-3.0F, -2.0F, -3.0F, 6.0F, 9.0F, 6.0F), PartPose.offsetAndRotation(0.0F, 14.0F, 2.0F, 1.5707964F, 0.0F, 0.0F));
 		modelPartData.addOrReplaceChild(UPPER_BODY, CubeListBuilder.create().texOffs(21, 0).addBox(-3.0F, -3.0F, -3.0F, 8.0F, 6.0F, 7.0F), PartPose.offsetAndRotation(-1.0F, 14.0F, -3.0F, 1.5707964F, 0.0F, 0.0F));
 
 		// Legs
-		CubeListBuilder modelPartBuilder = CubeListBuilder.create().texOffs(0, 18).addBox(0.0F, 0.0F, -1.0F, 2.0F, 8.0F, 2.0F);
-		modelPartData.addOrReplaceChild(PartNames.RIGHT_HIND_LEG, modelPartBuilder, PartPose.offset(-2.5F, 16.0F, 7.0F));
-		modelPartData.addOrReplaceChild(PartNames.LEFT_HIND_LEG, modelPartBuilder, PartPose.offset(0.5F, 16.0F, 7.0F));
-		modelPartData.addOrReplaceChild(PartNames.RIGHT_FRONT_LEG, modelPartBuilder, PartPose.offset(-2.5F, 16.0F, -4.0F));
-		modelPartData.addOrReplaceChild(PartNames.LEFT_FRONT_LEG, modelPartBuilder, PartPose.offset(0.5F, 16.0F, -4.0F));
+		CubeListBuilder leg = CubeListBuilder.create().texOffs(0, 18).addBox(0.0F, 0.0F, -1.0F, 2.0F, 8.0F, 2.0F);
+		CubeListBuilder mirroredLeg = CubeListBuilder.create().mirror().texOffs(0, 18).addBox(0.0F, 0.0F, -1.0F, 2.0F, 8.0F, 2.0F);
+		modelPartData.addOrReplaceChild(PartNames.RIGHT_HIND_LEG, mirroredLeg, PartPose.offset(-2.5F, 16.0F, 7.0F));
+		modelPartData.addOrReplaceChild(PartNames.LEFT_HIND_LEG, leg, PartPose.offset(0.5F, 16.0F, 7.0F));
+		modelPartData.addOrReplaceChild(PartNames.RIGHT_FRONT_LEG, mirroredLeg, PartPose.offset(-2.5F, 16.0F, -4.0F));
+		modelPartData.addOrReplaceChild(PartNames.LEFT_FRONT_LEG, leg, PartPose.offset(0.5F, 16.0F, -4.0F));
 
 		// Tail
 		PartDefinition modelPartData3 = modelPartData.addOrReplaceChild(PartNames.TAIL, CubeListBuilder.create(), PartPose.offsetAndRotation(-1.0F, 12.0F, 8.0F, 0.62831855F, 0.0F, 0.0F));

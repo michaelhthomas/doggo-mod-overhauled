@@ -48,6 +48,27 @@ dependencies {
 
 	// Jade
 	implementation "maven.modrinth:jade:${project.jade_version}"
+
+	testImplementation "org.junit.jupiter:junit-jupiter:5.11.4"
+	testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+}
+
+test {
+	useJUnitPlatform {
+		excludeTags 'dev'
+	}
+}
+
+// Development-only: exports doggo variant/state models (.obj/.mtl/.png) to build/render for inspection.
+tasks.register('exportModels', Test) {
+	description = 'Exports doggo variant/state models to build/render (development only).'
+	group = 'verification'
+	testClassesDirs = sourceSets.test.output.classesDirs
+	classpath = sourceSets.test.runtimeClasspath
+	useJUnitPlatform {
+		includeTags 'dev'
+	}
+	outputs.upToDateWhen { false }
 }
 
 loom {

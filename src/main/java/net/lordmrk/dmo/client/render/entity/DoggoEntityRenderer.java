@@ -2,10 +2,11 @@ package net.lordmrk.dmo.client.render.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.lordmrk.dmo.DoggoAction;
-import net.lordmrk.dmo.DoggoModOverhauled;
 import net.lordmrk.dmo.DoggoModOverhauledClient;
 import net.lordmrk.dmo.client.render.entity.feature.DoggoCollarFeatureRenderer;
+import net.lordmrk.dmo.client.render.entity.feature.DoggoEyesLayer;
 import net.lordmrk.dmo.client.render.entity.feature.DoggoHeldItemFeatureRenderer;
+import net.lordmrk.dmo.client.render.entity.feature.DoggoMouthLayer;
 import net.lordmrk.dmo.client.render.entity.model.*;
 import net.lordmrk.dmo.entity.DoggoEntity;
 import net.minecraft.client.renderer.SubmitNodeCollector;
@@ -15,17 +16,13 @@ import net.minecraft.client.renderer.item.ItemModelResolver;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
+import net.minecraft.world.entity.animal.wolf.WolfVariant;
 import net.minecraft.world.item.ItemDisplayContext;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class DoggoEntityRenderer extends MobRenderer<DoggoEntity, DoggoRenderState, DoggoEntityModel> {
-
-    private static final Identifier WILD_TEXTURE = Identifier.fromNamespaceAndPath(DoggoModOverhauled.MODID, "textures/entity/doggo/doggo.png");
-    private static final Identifier TAMED_TEXTURE = Identifier.fromNamespaceAndPath(DoggoModOverhauled.MODID, "textures/entity/doggo/doggo_tame.png");
-    private static final Identifier ANGRY_TEXTURE = Identifier.fromNamespaceAndPath(DoggoModOverhauled.MODID, "textures/entity/doggo/doggo_angry.png");
-    private static final Identifier SLEEPING_TEXTURE = Identifier.fromNamespaceAndPath(DoggoModOverhauled.MODID, "textures/entity/doggo/doggo_sleeping.png");
 
     private final ItemModelResolver itemModelResolver;
     private final Map<DoggoAction, DoggoEntityModel> doggoModels = new HashMap<>();
@@ -37,6 +34,8 @@ public class DoggoEntityRenderer extends MobRenderer<DoggoEntity, DoggoRenderSta
         this.baseModel = this.model;
 
         this.addLayer(new DoggoCollarFeatureRenderer(this));
+        this.addLayer(new DoggoMouthLayer(this));
+        this.addLayer(new DoggoEyesLayer(this));
         this.addLayer(new DoggoHeldItemFeatureRenderer(this));
 
         this.doggoModels.put(DoggoAction.DIGGING, new DoggoModelDigging(context.bakeLayer(DoggoModOverhauledClient.DOGGO)));
@@ -77,7 +76,13 @@ public class DoggoEntityRenderer extends MobRenderer<DoggoEntity, DoggoRenderSta
         state.begAnimationProgress = entity.getBegAnimationProgress(partialTicks);
         state.shakeProgress = entity.getShakeProgress(partialTicks);
         state.collarColor = entity.isTame() ? entity.getCollarColor() : null;
+        state.sleeping = entity.isAction(DoggoAction.NAPPING)
+                || entity.isAction(DoggoAction.STRETCHING) && entity.getAnimationTick() > 60 && entity.getAnimationTick() < 130;
         state.texture = this.getTexture(entity);
+
+        DoggoVariantTints.Tint tints = DoggoVariantTints.forTexture(state.texture);
+        state.faceTint = tints.face();
+        state.jawTint = tints.jaw();
 
         this.itemModelResolver.updateForLiving(state.heldItem, entity.getStackInMouth(), ItemDisplayContext.GROUND, entity);
     }
@@ -104,15 +109,12 @@ public class DoggoEntityRenderer extends MobRenderer<DoggoEntity, DoggoRenderSta
     }
 
     private Identifier getTexture(DoggoEntity entity) {
-        if (entity.isTame()) {
-            if (entity.isAction(DoggoAction.NAPPING) ||
-                    entity.isAction(DoggoAction.STRETCHING) && entity.getAnimationTick() > 60 && entity.getAnimationTick() < 130) {
-                return SLEEPING_TEXTURE;
-            }
+        WolfVariant.AssetInfo info = entity.getVariant().value().adultInfo();
 
-            return TAMED_TEXTURE;
-        } else {
-            return entity.isAngry() ? ANGRY_TEXTURE : WILD_TEXTURE;
+        if (entity.isTame()) {
+            return info.tame().texturePath();
         }
+
+        return entity.isAngry() ? info.angry().texturePath() : info.wild().texturePath();
     }
 }

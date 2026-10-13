@@ -5,13 +5,17 @@ import net.lordmrk.dmo.*;
 import net.lordmrk.dmo.block.entity.DogBowlEntity;
 import net.lordmrk.dmo.entity.ai.goal.*;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -55,6 +59,8 @@ import net.minecraft.world.entity.animal.wolf.Wolf;
 import net.minecraft.world.entity.animal.wolf.WolfSoundVariant;
 import net.minecraft.world.entity.animal.wolf.WolfSoundVariant.WolfSoundSet;
 import net.minecraft.world.entity.animal.wolf.WolfSoundVariants;
+import net.minecraft.world.entity.animal.wolf.WolfVariant;
+import net.minecraft.world.entity.animal.wolf.WolfVariants;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.entity.animal.equine.Llama;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -62,6 +68,7 @@ import net.minecraft.world.entity.monster.skeleton.AbstractSkeleton;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Ghast;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.variant.VariantUtils;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
@@ -97,9 +104,10 @@ public class DoggoEntity extends TamableAnimal implements NeutralMob {
     private static final EntityDataAccessor<Boolean> MOUTH_OPENED;
     private static final EntityDataAccessor<ItemStack> MOUTH_STACK;
     private static final EntityDataAccessor<Integer> SCRATCHING_SIDE;
+    private static final EntityDataAccessor<Holder<WolfVariant>> VARIANT;
+    private static final EntityDataAccessor<Holder<WolfSoundVariant>> SOUND_VARIANT;
 
     private static final Set<Block> DIGGABLE_BLOCKS = Sets.newHashSet(Blocks.GRASS_BLOCK, Blocks.DIRT, Blocks.SAND, Blocks.RED_SAND, Blocks.GRAVEL, Blocks.SNOW_BLOCK);
-    private static final WolfSoundVariant CLASSIC_WOLF_SOUNDS = SoundEvents.WOLF_SOUNDS.get(WolfSoundVariants.SoundSet.CLASSIC);
     private float begAnimationProgress;
     private float lastBegAnimationProgress;
     private boolean furWet;
@@ -223,6 +231,12 @@ public class DoggoEntity extends TamableAnimal implements NeutralMob {
             doggoEntity.setOwnerReference(owner);
         }
 
+        Holder<WolfVariant> variant = entity instanceof DoggoEntity other && this.random.nextBoolean()
+                ? other.getVariant()
+                : this.getVariant();
+        doggoEntity.setVariant(variant);
+        doggoEntity.setSoundVariant(WolfSoundVariants.pickRandomSoundVariant(this.registryAccess(), this.random));
+
         return doggoEntity;
     }
 
@@ -327,7 +341,8 @@ public class DoggoEntity extends TamableAnimal implements NeutralMob {
     }
 
     private WolfSoundSet wolfSounds() {
-        return this.isBaby() ? CLASSIC_WOLF_SOUNDS.babySounds() : CLASSIC_WOLF_SOUNDS.adultSounds();
+        WolfSoundVariant soundVariant = this.getSoundVariant().value();
+        return this.isBaby() ? soundVariant.babySounds() : soundVariant.adultSounds();
     }
 
     public Vec3 getLeashOffset() {
@@ -541,6 +556,9 @@ public class DoggoEntity extends TamableAnimal implements NeutralMob {
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
+        Registry<WolfSoundVariant> soundVariants = this.registryAccess().lookupOrThrow(Registries.WOLF_SOUND_VARIANT);
+        builder.define(VARIANT, VariantUtils.getDefaultOrAny(this.registryAccess(), WolfVariants.DEFAULT));
+        builder.define(SOUND_VARIANT, soundVariants.get(WolfSoundVariants.CLASSIC).or(soundVariants::getAny).orElseThrow());
         builder.define(ACTION, DoggoAction.NEUTRAL);
         builder.define(ACTION_TICKING, false);
         builder.define(ANGER_END_TIME, -1L);
@@ -654,13 +672,17 @@ public class DoggoEntity extends TamableAnimal implements NeutralMob {
     }
 
     protected void playStepSound(BlockPos pos, BlockState state) {
-        this.playSound(SoundEvents.WOLF_STEP.value(), 0.15F, 1.0F);
+        this.playSound(this.wolfSounds().stepSound().value(), 0.15F, 1.0F);
     }
 
     @Override
     public void readAdditionalSaveData(ValueInput input) {
         super.readAdditionalSaveData(input);
         input.getInt("CollarColor").ifPresent(color -> this.setCollarColor(DyeColor.byId(color)));
+        VariantUtils.readVariant(input, Registries.WOLF_VARIANT).ifPresent(this::setVariant);
+        input.<ResourceKey<WolfSoundVariant>>read("sound_variant", ResourceKey.codec(Registries.WOLF_SOUND_VARIANT))
+                .flatMap(soundVariant -> this.registryAccess().lookupOrThrow(Registries.WOLF_SOUND_VARIANT).get(soundVariant))
+                .ifPresent(this::setSoundVariant);
 
         this.readPersistentAngerSaveData(this.level(), input);
     }
@@ -701,8 +723,24 @@ public class DoggoEntity extends TamableAnimal implements NeutralMob {
         this.entityData.set(BOWL_POS, bowlPos);
     }
 
-    public void setCollarColor(DyeColor color) {
-        this.entityData.set(COLLAR_COLOR, color.getId());
+    public void setCollarColor(DyeColor collarColor) {
+        this.entityData.set(COLLAR_COLOR, collarColor.getId());
+    }
+
+    public Holder<WolfVariant> getVariant() {
+        return this.entityData.get(VARIANT);
+    }
+
+    public void setVariant(Holder<WolfVariant> variant) {
+        this.entityData.set(VARIANT, variant);
+    }
+
+    public Holder<WolfSoundVariant> getSoundVariant() {
+        return this.entityData.get(SOUND_VARIANT);
+    }
+
+    public void setSoundVariant(Holder<WolfSoundVariant> soundVariant) {
+        this.entityData.set(SOUND_VARIANT, soundVariant);
     }
 
     public void setFeeling(DoggoFeeling doggoFeeling) {
@@ -988,6 +1026,9 @@ public class DoggoEntity extends TamableAnimal implements NeutralMob {
     public void addAdditionalSaveData(ValueOutput output) {
         super.addAdditionalSaveData(output);
         output.putByte("CollarColor", (byte)this.getCollarColor().getId());
+        VariantUtils.writeVariant(output, this.getVariant());
+        this.getSoundVariant().unwrapKey()
+                .ifPresent(soundVariant -> output.store("sound_variant", ResourceKey.codec(Registries.WOLF_SOUND_VARIANT), soundVariant));
         this.addPersistentAngerSaveData(output);
     }
 
@@ -1003,6 +1044,8 @@ public class DoggoEntity extends TamableAnimal implements NeutralMob {
         MOUTH_OPENED = SynchedEntityData.defineId(DoggoEntity.class, EntityDataSerializers.BOOLEAN);
         MOUTH_STACK = SynchedEntityData.defineId(DoggoEntity.class, EntityDataSerializers.ITEM_STACK);
         SCRATCHING_SIDE = SynchedEntityData.defineId(DoggoEntity.class, EntityDataSerializers.INT);
+        VARIANT = SynchedEntityData.defineId(DoggoEntity.class, EntityDataSerializers.WOLF_VARIANT);
+        SOUND_VARIANT = SynchedEntityData.defineId(DoggoEntity.class, EntityDataSerializers.WOLF_SOUND_VARIANT);
 
         PICKABLE_DROP_FILTER = (itemEntity) -> !itemEntity.hasPickUpDelay() && itemEntity.isAlive();
         FOLLOWABLE_DROP_FILTER = (entity) -> entity.isAlive();

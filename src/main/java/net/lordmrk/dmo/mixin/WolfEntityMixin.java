@@ -27,7 +27,10 @@ public abstract class WolfEntityMixin extends TamableAnimal {
                 , target = "Lnet/minecraft/world/entity/animal/wolf/Wolf;tame(Lnet/minecraft/world/entity/player/Player;)V")
             , cancellable = true)
     private void convertToDoggo(Player player, CallbackInfo ci) {
+        WolfAccessor wolf = (WolfAccessor)(Object)this;
         DoggoEntity doggoEntity = DoggoEntities.DOGGO_ENTITY.spawn((ServerLevel)this.level(), (ItemStack)null, null, this.blockPosition(), EntitySpawnReason.CONVERSION, true, false);
+        doggoEntity.setVariant(wolf.dmo$getVariant());
+        doggoEntity.setSoundVariant(wolf.dmo$getSoundVariant());
         doggoEntity.tame(player);
         this.level().broadcastEntityEvent(doggoEntity, (byte)7);
         this.discard();
